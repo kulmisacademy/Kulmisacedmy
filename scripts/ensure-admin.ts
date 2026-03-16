@@ -29,12 +29,14 @@ const sql = neon(DATABASE_URL);
 const db = drizzle(sql as any, { schema });
 
 async function ensureAdmin() {
-  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  const email = ADMIN_EMAIL as string;
+  const password = ADMIN_PASSWORD as string;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const existing = await db
     .select()
     .from(schema.users)
-    .where(eq(schema.users.email, ADMIN_EMAIL))
+    .where(eq(schema.users.email, email))
     .limit(1);
 
   if (existing.length > 0) {
@@ -42,15 +44,15 @@ async function ensureAdmin() {
       .update(schema.users)
       .set({ role: "admin", password: hashedPassword })
       .where(eq(schema.users.id, existing[0].id));
-    console.log("Updated existing user to admin:", ADMIN_EMAIL);
+    console.log("Updated existing user to admin:", email);
   } else {
     await db.insert(schema.users).values({
       name: "Admin",
-      email: ADMIN_EMAIL,
+      email,
       password: hashedPassword,
       role: "admin",
     });
-    console.log("Created admin user:", ADMIN_EMAIL);
+    console.log("Created admin user:", email);
   }
   console.log("Sign in at /admin");
 }

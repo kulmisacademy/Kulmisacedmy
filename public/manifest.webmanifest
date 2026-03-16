@@ -1,0 +1,23 @@
+{
+  "name": "Kulmis Academy",
+  "short_name": "Kulmis",
+  "description": "Learn coding, AI, and technology with Kulmis Academy.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/kulmis-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/kulmis-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

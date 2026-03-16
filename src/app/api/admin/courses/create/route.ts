@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
 import { saveCourseThumbnailLocal, uploadCourseThumbnail } from "@/lib/upload";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.redirect(new URL("/admin", request.url));
-  }
-
-  const { id } = await params;
-  const courseId = parseInt(id, 10);
-  if (isNaN(courseId)) {
-    return NextResponse.redirect(new URL("/admin/dashboard/courses", request.url));
   }
 
   let formData: FormData;
@@ -25,14 +15,14 @@ export async function POST(
     formData = await request.formData();
   } catch {
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=upload`, request.url)
+      new URL("/admin/dashboard/courses/new?error=upload", request.url)
     );
   }
 
   const title = formData.get("title")?.toString()?.trim();
   if (!title) {
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=title`, request.url)
+      new URL("/admin/dashboard/courses/new?error=title", request.url)
     );
   }
 
@@ -48,15 +38,7 @@ export async function POST(
   const categoryIdFinal =
     categoryId != null && !isNaN(categoryId) && categoryId > 0 ? categoryId : null;
 
-  const [existing] = await db
-    .select({ thumbnail: courses.thumbnail })
-    .from(courses)
-    .where(eq(courses.id, courseId))
-    .limit(1);
-
-  const existingThumbnail = existing?.thumbnail ?? null;
-  let thumbnail: string | null = existingThumbnail;
-
+  let thumbnail: string | null = null;
   let thumbnailFailed = false;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
@@ -68,9 +50,8 @@ export async function POST(
       else thumbnailFailed = true;
     } else {
       const localPath = await saveCourseThumbnailLocal(file);
-      if (localPath) {
-        thumbnail = localPath;
-      } else {
+      if (localPath) thumbnail = localPath;
+      else {
         const blobUrl = await uploadCourseThumbnail(file);
         if (blobUrl) thumbnail = blobUrl;
         else thumbnailFailed = true;
@@ -79,30 +60,26 @@ export async function POST(
   }
 
   try {
-    await db
-      .update(courses)
-      .set({
-        title,
-        description,
-        thumbnail,
-        price: priceFinal,
-        instructorName,
-        learningOutcomes,
-        categoryId: categoryIdFinal,
-      })
-      .where(eq(courses.id, courseId));
+    await db.insert(courses).values({
+      title,
+      description,
+      thumbnail,
+      price: priceFinal,
+      instructorName,
+      learningOutcomes,
+      categoryId: categoryIdFinal,
+    });
   } catch (err) {
-    console.error("Course update failed:", err);
+    console.error("Course create failed:", err);
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=save`, request.url)
+      new URL("/admin/dashboard/courses/new?error=save", request.url)
     );
   }
 
-  const base = new URL("/admin/dashboard/courses", request.url);
   if (thumbnailFailed) {
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=thumbnail`, request.url)
+      new URL("/admin/dashboard/courses/new?error=thumbnail", request.url)
     );
   }
-  return NextResponse.redirect(base.toString());
+  return NextResponse.redirect(new URL("/admin/dashboard/courses", request.url));
 }

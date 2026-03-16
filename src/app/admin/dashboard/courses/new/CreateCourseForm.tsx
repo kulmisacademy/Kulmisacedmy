@@ -1,18 +1,35 @@
 "use client";
 
-import { useFormState } from "react-dom";
 import Link from "next/link";
-import { createCourse } from "../actions";
 import type { Category } from "@/lib/schema";
 
-export function CreateCourseForm({ categories }: { categories: Category[] }) {
-  const [state, formAction] = useFormState(createCourse, null);
+const ERROR_MESSAGES: Record<string, string> = {
+  title: "Title is required.",
+  upload: "Failed to read form. Please try again.",
+  save: "Failed to save. Please try again.",
+  thumbnail:
+    "Thumbnail could not be saved. Use a JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Project Settings → Environment Variables (paste only the token value, no quotes), create a Blob store in Storage if needed, then redeploy.",
+};
+
+export function CreateCourseForm({
+  categories,
+  errorParam,
+}: {
+  categories: Category[];
+  errorParam?: string;
+}) {
+  const errorMessage = errorParam ? ERROR_MESSAGES[errorParam] ?? "Something went wrong." : null;
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="mt-6 space-y-6">
-      {state?.error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {state.error}
+    <form
+      action="/api/admin/courses/create"
+      method="POST"
+      encType="multipart/form-data"
+      className="mt-6 space-y-6"
+    >
+      {errorMessage && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+          {errorMessage}
         </p>
       )}
       <div>
@@ -93,7 +110,8 @@ export function CreateCourseForm({ categories }: { categories: Category[] }) {
           accept="image/jpeg,image/png,image/webp,image/gif"
           className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-200"
         />
-        <p className="mt-1 text-xs text-gray-500">JPEG, PNG, WebP or GIF. Max 4 MB. The uploaded image will be saved and used as the course thumbnail.</p>
+        <p className="mt-1 text-xs text-gray-500">JPEG, PNG, WebP or GIF. Max 4 MB.</p>
+        <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">On Vercel: add BLOB_READ_WRITE_TOKEN (value only, no quotes) in Settings → Environment Variables, ensure a Blob store exists under Storage, then redeploy.</p>
       </div>
       <div>
         <label htmlFor="price" className="block text-sm font-medium text-gray-700">

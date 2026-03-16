@@ -7,7 +7,12 @@ import { CourseThumbnailCell } from "./CourseThumbnailCell";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCoursesPage() {
+export default async function AdminCoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error: errorParam } = await searchParams;
   const allCourses = await db.select().from(courses).orderBy(desc(courses.createdAt));
 
   const lessonCounts = await db
@@ -18,8 +23,13 @@ export default async function AdminCoursesPage() {
 
   return (
     <div>
+      {errorParam === "delete" && (
+        <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+          Failed to delete course. Please try again.
+        </p>
+      )}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Courses</h1>
         <Link
           href="/admin/dashboard/courses/new"
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"

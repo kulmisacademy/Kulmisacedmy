@@ -94,9 +94,13 @@ export async function uploadCourseThumbnail(
   }
 
   try {
-    const blob = await put(`courses/${Date.now()}-${file.name}`, file, {
+    // Use ArrayBuffer so upload works reliably in Vercel serverless (File can be unreliable there)
+    const buffer = await file.arrayBuffer();
+    const pathname = `courses/${Date.now()}-${(file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const blob = await put(pathname, buffer, {
       access: "public",
       token,
+      contentType: file.type || "image/jpeg",
     });
     return blob.url;
   } catch (err) {

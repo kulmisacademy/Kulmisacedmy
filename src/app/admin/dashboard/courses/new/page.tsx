@@ -6,7 +6,12 @@ import { CreateCourseForm } from "./CreateCourseForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewCoursePage() {
+export default async function NewCoursePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error: errorParam } = await searchParams;
   const categoriesList = await db.select().from(categories).orderBy(asc(categories.name));
   return (
     <div>
@@ -20,7 +25,7 @@ export default async function NewCoursePage() {
       <p className="mt-2 text-gray-600">
         Add a new course. You can add lessons after the course is created.
       </p>
-      <CreateCourseForm categories={categoriesList} />
+      <CreateCourseForm categories={categoriesList} errorParam={errorParam} />
     </div>
   );
 }

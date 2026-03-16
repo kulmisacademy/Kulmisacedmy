@@ -95,8 +95,11 @@ export default async function LessonPlayerPage({
 
   const isPaidCourse = course.price != null && course.price > 0;
 
-  // 3. Non-preview: require enrollment with status = approved
-  let canAccess = !!currentLesson.isPreview;
+  // Paid courses: no lesson preview — all lessons locked until enrollment is approved
+  const allowPreview = !isPaidCourse && !!currentLesson.isPreview;
+
+  // 3. Access = approved enrollment only (or free-course preview)
+  let canAccess = allowPreview;
   let enrollmentStatus: string | null = null;
   let hasPendingPayment = false;
 
@@ -126,8 +129,8 @@ export default async function LessonPlayerPage({
     }
   }
 
-  // Pending enrollment: show message, no video
-  if (session && !currentLesson.isPreview && enrollmentStatus === "pending") {
+  // Pending enrollment: block lesson, show message (no video)
+  if (session && enrollmentStatus === "pending") {
     return (
       <div className="min-h-screen flex flex-col">
         <HeaderWithSession />
@@ -137,7 +140,7 @@ export default async function LessonPlayerPage({
               Waiting for approval
             </h1>
             <p className="mt-3 text-gray-600 dark:text-gray-400">
-              Waiting for admin approval. Please contact support.
+              Your request is waiting for admin approval. Please wait.
             </p>
             <Link
               href={`/courses/${courseId}`}
@@ -152,18 +155,23 @@ export default async function LessonPlayerPage({
     );
   }
 
-  // Not enrolled or rejected — redirect with message
+  // Rejected enrollment — redirect to course
+  if (session && enrollmentStatus === "rejected") {
+    redirect(`/courses/${courseId}?message=rejected`);
+  }
+
+  // Not enrolled: redirect to login, or to payment request (checkout) with message
   if (!canAccess) {
     if (session && hasPendingPayment) {
       redirect(`/courses/${courseId}?pending=1`);
     }
     if (session && isPaidCourse) {
-      redirect(`/courses/${courseId}/checkout?mustEnroll=1`);
+      redirect(`/courses/${courseId}/checkout?message=request`);
     }
     redirect(`/courses/${courseId}?message=enroll`);
   }
 
-  if (session && !currentLesson.isPreview) {
+  if (session && !allowPreview) {
     await markLessonComplete(session.userId, lessonIdNum);
   }
 

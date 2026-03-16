@@ -111,11 +111,13 @@ export default async function CourseDetailPage({
               <div>
                 <CourseThumbnail src={course.thumbnail} title={course.title} subtitle={course.description ? course.description.slice(0, 100).trim() + (course.description.length > 100 ? "…" : "") : undefined} />
                 <p className="mt-4 text-2xl font-bold text-gray-900">{formatPrice(course.price)}</p>
-                {((messageParam === "enroll" && !isEnrolled) || pendingParam === "1") && (
+                {((messageParam === "enroll" && !isEnrolled) || pendingParam === "1" || messageParam === "rejected") && (
                   <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
-                    {pendingParam === "1"
-                      ? "Your request is pending admin approval. Please wait or contact support."
-                      : "You must enroll in this course before watching lessons."}
+                    {messageParam === "rejected"
+                      ? "Your access request was not approved. Please contact support if you believe this is an error."
+                      : pendingParam === "1"
+                        ? "Your request is waiting for admin approval. Please wait."
+                        : "You must enroll in this course before watching lessons."}
                   </div>
                 )}
                 <EnrollSection
@@ -166,7 +168,8 @@ export default async function CourseDetailPage({
             ) : (
               <ul className="mt-4 space-y-2">
                 {courseLessons.map((lesson, index) => {
-                  const canAccess = isEnrolled || !!lesson.isPreview;
+                  const isPaidCourse = course.price != null && course.price > 0;
+                  const canAccess = isEnrolled || (!isPaidCourse && !!lesson.isPreview);
                   return (
                     <li key={lesson.id}>
                       {canAccess ? (
@@ -188,6 +191,28 @@ export default async function CourseDetailPage({
                           <span className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-600 transition-colors">
                             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                        </Link>
+                      ) : isPaidCourse && session ? (
+                        <Link
+                          href={`/courses/${courseId}/checkout?message=request`}
+                          className="flex items-center gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-gray-500 hover:border-primary-200 hover:bg-primary-50/50 transition-colors"
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-semibold text-sm text-gray-500">
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-medium text-gray-600">
+                              Lesson {index + 1} — {lesson.title}
+                            </span>
+                            {lesson.duration != null && (
+                              <span className="ml-2 text-sm text-gray-400">{lesson.duration} min</span>
+                            )}
+                          </div>
+                          <span className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-400" title="Locked — Request access">
+                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                             </svg>
                           </span>
                         </Link>

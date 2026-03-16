@@ -21,10 +21,13 @@ function formatPrice(price: number | null): string {
 
 export default async function CheckoutPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ message?: string }>;
 }) {
   const { id } = await params;
+  const { message: messageParam } = await searchParams;
   const courseId = parseInt(id, 10);
   if (isNaN(courseId)) notFound();
 
@@ -64,6 +67,11 @@ export default async function CheckoutPage({
           <div className="mb-6 sm:mb-8">
             <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">Complete Your Enrollment</h1>
             <p className="mt-1 text-sm sm:text-base text-gray-600">Secure checkout for your premium learning experience.</p>
+            {messageParam === "request" && (
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                You must request access to this course before watching lessons.
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-[1fr,1.2fr]">

@@ -49,7 +49,10 @@ export async function saveCourseThumbnailLocal(
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filePath, buffer);
     return `/uploads/courses/${name}`;
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[upload] saveCourseThumbnailLocal failed:", err);
+    }
     return null;
   }
 }
@@ -91,7 +94,8 @@ export async function uploadCourseThumbnail(
       access: "public",
     });
     return blob.url;
-  } catch {
+  } catch (err) {
+    console.error("[upload] Vercel Blob upload failed:", err);
     return null;
   }
 }

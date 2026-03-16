@@ -111,6 +111,7 @@ export function EditCourseForm({
           className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-200"
         />
         <p className="mt-1 text-xs text-gray-500">Upload a new image to replace the thumbnail. Leave empty to keep the current thumbnail. Max 4 MB.</p>
+        <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">Deployed on Vercel? Add BLOB_READ_WRITE_TOKEN in Project → Settings → Environment Variables, then redeploy.</p>
       </div>
       <div>
         <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>

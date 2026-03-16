@@ -60,15 +60,19 @@ export async function POST(
   let thumbnailFailed = false;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
-    const localPath = await saveCourseThumbnailLocal(file);
-    if (localPath) {
-      thumbnail = localPath;
-    } else {
+    const isVercel = process.env.VERCEL === "1";
+    if (isVercel && process.env.BLOB_READ_WRITE_TOKEN) {
       const blobUrl = await uploadCourseThumbnail(file);
-      if (blobUrl) {
-        thumbnail = blobUrl;
+      if (blobUrl) thumbnail = blobUrl;
+      else thumbnailFailed = true;
+    } else {
+      const localPath = await saveCourseThumbnailLocal(file);
+      if (localPath) {
+        thumbnail = localPath;
       } else {
-        thumbnailFailed = true;
+        const blobUrl = await uploadCourseThumbnail(file);
+        if (blobUrl) thumbnail = blobUrl;
+        else thumbnailFailed = true;
       }
     }
   }

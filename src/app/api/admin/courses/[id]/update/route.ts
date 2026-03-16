@@ -57,6 +57,7 @@ export async function POST(
   const existingThumbnail = existing?.thumbnail ?? null;
   let thumbnail: string | null = existingThumbnail;
 
+  let thumbnailFailed = false;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
     const localPath = await saveCourseThumbnailLocal(file);
@@ -64,7 +65,11 @@ export async function POST(
       thumbnail = localPath;
     } else {
       const blobUrl = await uploadCourseThumbnail(file);
-      if (blobUrl) thumbnail = blobUrl;
+      if (blobUrl) {
+        thumbnail = blobUrl;
+      } else {
+        thumbnailFailed = true;
+      }
     }
   }
 
@@ -88,5 +93,11 @@ export async function POST(
     );
   }
 
-  return NextResponse.redirect(new URL("/admin/dashboard/courses", request.url));
+  const base = new URL("/admin/dashboard/courses", request.url);
+  if (thumbnailFailed) {
+    return NextResponse.redirect(
+      new URL(`/admin/dashboard/courses/${courseId}/edit?error=thumbnail`, request.url)
+    );
+  }
+  return NextResponse.redirect(base.toString());
 }

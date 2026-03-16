@@ -3,6 +3,7 @@ import { desc, count } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses, lessons } from "@/lib/schema";
 import { DeleteCourseButton } from "./DeleteCourseButton";
+import { CourseThumbnailCell } from "./CourseThumbnailCell";
 
 export const dynamic = "force-dynamic";
 
@@ -45,16 +46,7 @@ export default async function AdminCoursesPage() {
                 <tr key={c.id} className="dark:bg-gray-800">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-600">
-                        {c.thumbnail ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={c.thumbnail} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-sm font-bold text-gray-400">
-                            {c.title.charAt(0)}
-                          </span>
-                        )}
-                      </div>
+                      <CourseThumbnailCell thumbnail={c.thumbnail} title={c.title} />
                       <Link href={`/admin/dashboard/courses/${c.id}`} className="font-medium text-gray-900 dark:text-white hover:text-primary-600 hover:underline">
                         {c.title}
                       </Link>

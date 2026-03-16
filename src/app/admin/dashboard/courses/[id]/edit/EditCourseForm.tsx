@@ -8,7 +8,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   upload: "Failed to read form. Please try again.",
   save: "Failed to save. Please try again.",
   thumbnail:
-    "Thumbnail could not be saved. Use JPEG, PNG, WebP or GIF under 4 MB. On production (e.g. Vercel), set BLOB_READ_WRITE_TOKEN for uploads.",
+    "Thumbnail could not be saved. Use a JPEG, PNG, WebP or GIF under 4 MB. If you're on Vercel, add BLOB_READ_WRITE_TOKEN in Project Settings → Environment Variables, then redeploy.",
 };
 
 export function EditCourseForm({

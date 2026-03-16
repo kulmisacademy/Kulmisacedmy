@@ -5,12 +5,14 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 const MAX_SIZE = 4 * 1024 * 1024; // 4 MB
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/jpg", "image/x-png"];
 const UPLOAD_DIR = "public/uploads/courses";
 
 const EXT_BY_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
+  "image/jpg": "jpg",
   "image/png": "png",
+  "image/x-png": "png",
   "image/webp": "webp",
   "image/gif": "gif",
 };
@@ -18,22 +20,28 @@ const EXT_BY_TYPE: Record<string, string> = {
 /**
  * Save course thumbnail to local public/uploads/courses/ and return the public path.
  * Works when running locally (e.g. npm run dev / Node server).
- * Returns path like /uploads/courses/course-1234567890-abc12.jpg for storing in DB.
+ * On Vercel the filesystem is read-only; use BLOB_READ_WRITE_TOKEN for production.
  */
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+
+function isAllowedImage(file: File): boolean {
+  const extFromName = path.extname(file.name).slice(1).toLowerCase();
+  if (extFromName && IMAGE_EXT.has(extFromName)) return true;
+  if (IMAGE_TYPES.includes(file.type)) return true;
+  if (file.type.startsWith("image/")) return true;
+  return false;
+}
 
 export async function saveCourseThumbnailLocal(
   file: File | null
 ): Promise<string | null> {
   if (!file || file.size === 0) return null;
   if (file.size > MAX_SIZE) return null;
-  const extFromName = path.extname(file.name).slice(1).toLowerCase();
-  const allowedByMime = IMAGE_TYPES.includes(file.type);
-  const allowedByExt = extFromName && IMAGE_EXT.has(extFromName);
-  if (!allowedByMime && !allowedByExt) return null;
+  if (!isAllowedImage(file)) return null;
 
   try {
-    const ext = EXT_BY_TYPE[file.type] ?? (extFromName || "jpg");
+    const extFromName = path.extname(file.name).slice(1).toLowerCase();
+    const ext = EXT_BY_TYPE[file.type] ?? (extFromName && IMAGE_EXT.has(extFromName) ? extFromName : "jpg");
     const name = `course-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
     const dir = path.join(process.cwd(), UPLOAD_DIR);
     await mkdir(dir, { recursive: true });
@@ -75,10 +83,7 @@ export async function uploadCourseThumbnail(
 ): Promise<string | null> {
   if (!file || file.size === 0) return null;
   if (file.size > MAX_SIZE) return null;
-  const extFromName = path.extname(file.name).slice(1).toLowerCase();
-  const allowedByMime = IMAGE_TYPES.includes(file.type);
-  const allowedByExt = extFromName && IMAGE_EXT.has(extFromName);
-  if (!allowedByMime && !allowedByExt) return null;
+  if (!isAllowedImage(file)) return null;
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
 
   try {

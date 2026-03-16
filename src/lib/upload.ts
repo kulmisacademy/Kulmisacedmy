@@ -1,6 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
+import ImageKit, { toFile } from "@imagekit/nodejs";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -56,6 +57,47 @@ export async function saveCourseThumbnailLocal(
     return null;
   }
 }
+
+/**
+ * Upload a course thumbnail to ImageKit.io.
+ * Requires IMAGEKIT_PRIVATE_KEY (and optionally IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT for older SDK) in env.
+ * Returns the public image URL or null.
+ */
+export async function uploadCourseThumbnailImageKit(
+  file: File | null
+): Promise<string | null> {
+  if (!file || file.size === 0) return null;
+  if (file.size > MAX_SIZE) return null;
+  if (!isAllowedImage(file)) return null;
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY?.trim();
+  if (!privateKey) {
+    console.error("[upload] IMAGEKIT_PRIVATE_KEY is not set or empty");
+    return null;
+  }
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const ext = (EXT_BY_TYPE[file.type] ?? path.extname(file.name).slice(1)) || "jpg";
+    const baseName = (file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.[^.]+$/, "") || "image";
+    const fileName = `${Date.now()}-${baseName}.${ext}`;
+    const fileForUpload = await toFile(buffer, fileName, {
+      type: file.type || "image/jpeg",
+    });
+    const imagekit = new ImageKit({ privateKey });
+    const res = await imagekit.files.upload({
+      file: fileForUpload,
+      fileName,
+      folder: "courses",
+    });
+    const url = (res as { url?: string }).url;
+    return url ?? null;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[upload] ImageKit upload failed:", msg);
+    return null;
+  }
+}
+
 const RESOURCE_TYPES = [
   "application/pdf",
   "application/zip",

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
-import { saveCourseThumbnailLocal, uploadCourseThumbnail } from "@/lib/upload";
+import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadCourseThumbnailImageKit } from "@/lib/upload";
 
 export const runtime = "nodejs";
 
@@ -63,30 +63,22 @@ export async function POST(
   let thumbnailErrorCode: "no_token" | "upload_failed" | null = null;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
+    const hasImageKit = Boolean(process.env.IMAGEKIT_PRIVATE_KEY?.trim());
     const isVercel = process.env.VERCEL === "1";
     const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
-    if (isVercel && !hasBlobToken) {
-      thumbnailFailed = true;
-      thumbnailErrorCode = "no_token";
-    } else if (isVercel && hasBlobToken) {
-      const blobUrl = await uploadCourseThumbnail(file);
-      if (blobUrl) thumbnail = blobUrl;
-      else {
-        thumbnailFailed = true;
-        thumbnailErrorCode = "upload_failed";
-      }
-    } else {
+
+    let url: string | null = null;
+    if (hasImageKit) url = await uploadCourseThumbnailImageKit(file);
+    if (!url) {
       const localPath = await saveCourseThumbnailLocal(file);
-      if (localPath) {
-        thumbnail = localPath;
-      } else {
-        const blobUrl = await uploadCourseThumbnail(file);
-        if (blobUrl) thumbnail = blobUrl;
-        else {
-          thumbnailFailed = true;
-          thumbnailErrorCode = "upload_failed";
-        }
-      }
+      if (localPath) url = localPath;
+    }
+    if (!url && hasBlobToken) url = await uploadCourseThumbnail(file);
+
+    if (url) thumbnail = url;
+    else {
+      thumbnailFailed = true;
+      thumbnailErrorCode = isVercel && !hasBlobToken && !hasImageKit ? "no_token" : "upload_failed";
     }
   }
 

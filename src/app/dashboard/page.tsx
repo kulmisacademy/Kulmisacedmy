@@ -107,11 +107,13 @@ export default async function MyCoursesPage() {
                 key={course.id}
                 className="flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 bg-white shadow-sm card-hover"
               >
-                <div className="aspect-video w-full shrink-0 overflow-hidden bg-gray-100">
-                  <CourseThumbnail src={course.thumbnail} title={course.title} subtitle={course.description ? course.description.slice(0, 80).trim() + (course.description.length > 80 ? "…" : "") : undefined} />
-                </div>
+                <Link href={`/courses/${course.id}`} className="block aspect-video w-full shrink-0 overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-gray-100">
+                  <CourseThumbnail src={course.thumbnail} title={course.title} />
+                </Link>
                 <div className="flex flex-1 flex-col p-4 sm:p-5">
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2">{course.title}</h2>
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2">
+                    <Link href={`/courses/${course.id}`}>{course.title}</Link>
+                  </h2>
                   {course.instructorName && (
                     <p className="mt-1 text-xs sm:text-sm text-gray-500">By {course.instructorName}</p>
                   )}

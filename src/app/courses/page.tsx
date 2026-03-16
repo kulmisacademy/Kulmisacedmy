@@ -95,16 +95,11 @@ export default async function CoursesPage({
                       key={course.id}
                       className="group flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 bg-white shadow-sm card-hover"
                     >
-                      <Link href={`/courses/${course.id}`} className="block shrink-0">
-                        <div className="aspect-video w-full overflow-hidden bg-gray-100">
-                          <CourseThumbnail src={course.thumbnail} title={course.title} subtitle={shortDescription(course.description)} />
-                        </div>
+                      <Link href={`/courses/${course.id}`} className="block shrink-0 overflow-hidden rounded-t-xl sm:rounded-t-2xl">
+                        <CourseThumbnail src={course.thumbnail} title={course.title} />
                       </Link>
                       <div className="flex flex-1 flex-col p-4 sm:p-5">
-                        <p className="text-xs font-medium text-gray-500">
-                          {lessonCount} Lesson{lessonCount !== 1 ? "s" : ""}
-                        </p>
-                        <h2 className="mt-1 text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 smooth-transition line-clamp-2">
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 smooth-transition line-clamp-2">
                           <Link href={`/courses/${course.id}`}>{course.title}</Link>
                         </h2>
                         {course.description && (
@@ -112,8 +107,11 @@ export default async function CoursesPage({
                             {shortDescription(course.description)}
                           </p>
                         )}
+                        <p className="mt-2 text-xs font-medium text-gray-500">
+                          {lessonCount} Lesson{lessonCount !== 1 ? "s" : ""}
+                        </p>
                         {course.instructorName && (
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-2 flex items-center gap-2">
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
                               {course.instructorName.charAt(0)}
                             </div>

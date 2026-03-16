@@ -55,14 +55,8 @@ export default async function FeaturedCourses() {
                 key={course.id}
                 className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-shadow hover:shadow-xl card-hover"
               >
-                <Link href={`/courses/${course.id}`} className="block shrink-0">
-                  <div className="aspect-video w-full overflow-hidden rounded-t-2xl">
-                    <CourseThumbnail
-                      src={course.thumbnail}
-                      title={course.title}
-                      subtitle={shortDescription(course.description)}
-                    />
-                  </div>
+                <Link href={`/courses/${course.id}`} className="block shrink-0 overflow-hidden rounded-t-2xl">
+                  <CourseThumbnail src={course.thumbnail} title={course.title} />
                 </Link>
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="text-xl font-bold text-gray-900">
@@ -72,17 +66,17 @@ export default async function FeaturedCourses() {
                   </h3>
                   {course.description && (
                     <p className="mt-2 flex-1 line-clamp-2 text-gray-600 text-sm">
-                      {course.description}
+                      {shortDescription(course.description)}
                     </p>
                   )}
-                  <p className="mt-4 text-sm text-gray-500">
+                  <p className="mt-4 text-lg font-semibold text-gray-900">
                     {course.price != null && course.price > 0 ? `$${course.price}` : "Free"}
                   </p>
                   <Link
                     href={`/courses/${course.id}`}
-                    className="mt-6 inline-flex justify-center rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 transition-colors border border-primary-400/30"
+                    className="mt-6 inline-flex justify-center rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
                   >
-                    View course
+                    View Course
                   </Link>
                 </div>
               </article>

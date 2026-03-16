@@ -8,7 +8,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   upload: "Failed to read form. Please try again.",
   save: "Failed to save. Please try again.",
   thumbnail:
-    "Thumbnail could not be saved. Use a JPEG, PNG, WebP or GIF under 4 MB. If you're on Vercel, add BLOB_READ_WRITE_TOKEN in Project Settings → Environment Variables, then redeploy.",
+    "Thumbnail could not be saved. Use a JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Project Settings → Environment Variables (paste only the token value, no quotes), create a Blob store in Storage if needed, then redeploy.",
 };
 
 export function EditCourseForm({
@@ -111,7 +111,7 @@ export function EditCourseForm({
           className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-200"
         />
         <p className="mt-1 text-xs text-gray-500">Upload a new image to replace the thumbnail. Leave empty to keep the current thumbnail. Max 4 MB.</p>
-        <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">Deployed on Vercel? Add BLOB_READ_WRITE_TOKEN in Project → Settings → Environment Variables, then redeploy.</p>
+        <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">On Vercel: add BLOB_READ_WRITE_TOKEN (value only, no quotes) in Settings → Environment Variables, ensure a Blob store exists under Storage, then redeploy.</p>
       </div>
       <div>
         <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>

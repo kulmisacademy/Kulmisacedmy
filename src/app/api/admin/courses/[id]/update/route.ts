@@ -61,7 +61,11 @@ export async function POST(
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
     const isVercel = process.env.VERCEL === "1";
-    if (isVercel && process.env.BLOB_READ_WRITE_TOKEN) {
+    const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+    if (process.env.VERCEL === "1") {
+      console.log("[course-update] Vercel env, BLOB_READ_WRITE_TOKEN present:", hasBlobToken);
+    }
+    if (isVercel && hasBlobToken) {
       const blobUrl = await uploadCourseThumbnail(file);
       if (blobUrl) thumbnail = blobUrl;
       else thumbnailFailed = true;

@@ -87,11 +87,16 @@ export async function uploadCourseThumbnail(
   if (!file || file.size === 0) return null;
   if (file.size > MAX_SIZE) return null;
   if (!isAllowedImage(file)) return null;
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (!token) {
+    console.error("[upload] BLOB_READ_WRITE_TOKEN is not set or empty");
+    return null;
+  }
 
   try {
     const blob = await put(`courses/${Date.now()}-${file.name}`, file, {
       access: "public",
+      token,
     });
     return blob.url;
   } catch (err) {

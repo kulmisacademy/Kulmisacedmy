@@ -1,20 +1,36 @@
 "use client";
 
-import { useFormState } from "react-dom";
 import Link from "next/link";
-import { updateCourse } from "../../actions";
 import type { Course, Category } from "@/lib/schema";
 
-export function EditCourseForm({ course, categories }: { course: Course; categories: Category[] }) {
-  const [state, formAction] = useFormState(
-    updateCourse.bind(null, course.id),
-    null as { error?: string } | null
-  );
+const ERROR_MESSAGES: Record<string, string> = {
+  title: "Title is required.",
+  upload: "Failed to read form. Please try again.",
+  save: "Failed to save. Please try again.",
+};
+
+export function EditCourseForm({
+  course,
+  categories,
+  errorParam,
+}: {
+  course: Course;
+  categories: Category[];
+  errorParam?: string;
+}) {
+  const errorMessage = errorParam ? ERROR_MESSAGES[errorParam] ?? "Something went wrong." : null;
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="mt-6 space-y-6">
-      {state?.error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>
+    <form
+      action={`/api/admin/courses/${course.id}/update`}
+      method="POST"
+      encType="multipart/form-data"
+      className="mt-6 space-y-6"
+    >
+      {errorMessage && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+          {errorMessage}
+        </p>
       )}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title *</label>

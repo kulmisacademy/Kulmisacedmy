@@ -75,7 +75,10 @@ export async function uploadCourseThumbnail(
 ): Promise<string | null> {
   if (!file || file.size === 0) return null;
   if (file.size > MAX_SIZE) return null;
-  if (!IMAGE_TYPES.includes(file.type)) return null;
+  const extFromName = path.extname(file.name).slice(1).toLowerCase();
+  const allowedByMime = IMAGE_TYPES.includes(file.type);
+  const allowedByExt = extFromName && IMAGE_EXT.has(extFromName);
+  if (!allowedByMime && !allowedByExt) return null;
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
 
   try {

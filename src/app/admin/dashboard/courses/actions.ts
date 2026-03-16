@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses, lessons, lessonResources, courseResources } from "@/lib/schema";
@@ -108,6 +109,8 @@ export async function deleteCourse(formData: FormData) {
   const courseId = typeof courseIdRaw === "string" ? parseInt(courseIdRaw, 10) : null;
   if (courseId == null || isNaN(courseId)) return;
   await db.delete(courses).where(eq(courses.id, courseId));
+  revalidatePath("/admin/dashboard/courses");
+  revalidatePath("/admin/dashboard");
   redirect("/admin/dashboard/courses");
 }
 

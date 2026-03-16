@@ -4,8 +4,10 @@ import { eq, asc, and, desc } from "drizzle-orm";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 import { db } from "@/lib/db";
-import { courses, lessons, enrollments, lessonResources, users, paymentRequests } from "@/lib/schema";
+import { courses, lessons, enrollments, lessonResources, courseResources, users, paymentRequests } from "@/lib/schema";
+import { CourseResourcesBlock } from "../../CourseResourcesBlock";
 import { getSession } from "@/lib/auth";
+import { checkOrCreateUserSession } from "@/lib/session-access";
 import { getVideoEmbed } from "@/lib/video";
 import { LessonPlayerTabs } from "./LessonPlayerTabs";
 import { LessonListSlide } from "./LessonListSlide";
@@ -48,6 +50,13 @@ export default async function LessonPlayerPage({
   if (!currentLesson) notFound();
 
   const session = await getSession();
+
+  // 1. Non-preview requires login — redirect to signin with returnTo
+  if (!session && !currentLesson.isPreview) {
+    const returnTo = `/courses/${courseId}/lessons/${lessonIdNum}`;
+    redirect(`/signin?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+
   if (session) {
     const [user] = await db
       .select({ status: users.status })
@@ -55,19 +64,41 @@ export default async function LessonPlayerPage({
       .where(eq(users.id, session.userId))
       .limit(1);
     if ((user?.status as string) === "blocked") redirect("/blocked");
+
+    // 2. IP-based session: one active session per user
+    const sessionCheck = await checkOrCreateUserSession(session.userId);
+    if (!sessionCheck.allowed) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <HeaderWithSession />
+          <main className="flex-1 flex items-center justify-center p-6">
+            <div className="max-w-md rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-900/20">
+              <h1 className="text-xl font-bold text-amber-800 dark:text-amber-200">
+                Session limit
+              </h1>
+              <p className="mt-3 text-amber-700 dark:text-amber-300">
+                This course is already being used on another device. Only one active session is allowed per account.
+              </p>
+              <Link
+                href={`/courses/${courseId}`}
+                className="mt-6 inline-block rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700"
+              >
+                Back to course
+              </Link>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      );
+    }
   }
 
   const isPaidCourse = course.price != null && course.price > 0;
 
-  // Enforce access rules:
-  // - Must be logged in for all non-preview lessons
-  // - Free course: logged-in students can watch (and enrolling adds it to My Courses)
-  // - Paid course: require an approved enrollment (created when admin approves payment)
-  if (!session && !currentLesson.isPreview) {
-    redirect(`/courses/${courseId}`);
-  }
-
+  // 3. Non-preview: require enrollment with status = approved
   let canAccess = !!currentLesson.isPreview;
+  let enrollmentStatus: string | null = null;
+  let hasPendingPayment = false;
 
   if (session && !canAccess) {
     const [enrollment] = await db
@@ -76,40 +107,60 @@ export default async function LessonPlayerPage({
       .where(and(eq(enrollments.userId, session.userId), eq(enrollments.courseId, courseId)))
       .limit(1);
 
-    if (!isPaidCourse) {
-      // Free course: any logged-in student with or without enrollment can watch.
-      canAccess = true;
+    if (enrollment) {
+      enrollmentStatus = (enrollment as { status?: string }).status ?? "approved";
+      canAccess = enrollmentStatus === "approved";
     } else {
-      // Paid course: only allow if an enrollment exists (payment approved).
-      canAccess = !!enrollment;
-
-      if (!canAccess) {
-        // If there's a pending payment request, send the student back with a friendly message.
-        const [pendingReq] = await db
-          .select()
-          .from(paymentRequests)
-          .where(
-            and(
-              eq(paymentRequests.userId, session.userId),
-              eq(paymentRequests.courseId, courseId)
-            )
+      const [pendingReq] = await db
+        .select()
+        .from(paymentRequests)
+        .where(
+          and(
+            eq(paymentRequests.userId, session.userId),
+            eq(paymentRequests.courseId, courseId)
           )
-          .orderBy(desc(paymentRequests.createdAt))
-          .limit(1);
-
-        if (pendingReq && pendingReq.status === "pending") {
-          redirect(`/courses/${courseId}?pending=1`);
-        }
-      }
+        )
+        .orderBy(desc(paymentRequests.createdAt))
+        .limit(1);
+      hasPendingPayment = !!pendingReq && pendingReq.status === "pending";
     }
   }
 
+  // Pending enrollment: show message, no video
+  if (session && !currentLesson.isPreview && enrollmentStatus === "pending") {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <HeaderWithSession />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800/50">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              Waiting for approval
+            </h1>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">
+              Waiting for admin approval. Please contact support.
+            </p>
+            <Link
+              href={`/courses/${courseId}`}
+              className="mt-6 inline-block rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700"
+            >
+              Back to course
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Not enrolled or rejected — redirect with message
   if (!canAccess) {
-    // For paid courses without enrollment, send to checkout. Otherwise back to course page.
-    if (isPaidCourse) {
+    if (session && hasPendingPayment) {
+      redirect(`/courses/${courseId}?pending=1`);
+    }
+    if (session && isPaidCourse) {
       redirect(`/courses/${courseId}/checkout?mustEnroll=1`);
     }
-    redirect(`/courses/${courseId}`);
+    redirect(`/courses/${courseId}?message=enroll`);
   }
 
   if (session && !currentLesson.isPreview) {
@@ -122,10 +173,10 @@ export default async function LessonPlayerPage({
   const embedUrl = videoEmbed?.embedUrl ?? null;
   const progressPercent = allLessons.length > 0 ? Math.round(((currentIndex + 1) / allLessons.length) * 100) : 0;
 
-  const resources = await db
-    .select()
-    .from(lessonResources)
-    .where(eq(lessonResources.lessonId, lessonIdNum));
+  const [resources, courseResourcesList] = await Promise.all([
+    db.select().from(lessonResources).where(eq(lessonResources.lessonId, lessonIdNum)),
+    db.select().from(courseResources).where(eq(courseResources.courseId, courseId)),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -276,6 +327,12 @@ export default async function LessonPlayerPage({
               </div>
 
               <LessonPlayerTabs overviewContent={currentLesson.description} resources={resources} />
+
+              {courseResourcesList.length > 0 && (
+                <div className="mt-8">
+                  <CourseResourcesBlock resources={courseResourcesList} />
+                </div>
+              )}
             </div>
           </div>
         </div>

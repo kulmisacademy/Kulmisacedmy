@@ -84,6 +84,27 @@ async function migrate() {
     status varchar(20) NOT NULL DEFAULT 'pending',
     created_at timestamp DEFAULT now() NOT NULL
   )`;
+  await sql`DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'enrollments' AND column_name = 'status') THEN
+        ALTER TABLE enrollments ADD COLUMN status varchar(20) NOT NULL DEFAULT 'approved';
+      END IF;
+    END $$`;
+  await sql`CREATE TABLE IF NOT EXISTS user_sessions (
+    id serial PRIMARY KEY NOT NULL,
+    user_id integer NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    ip_address varchar(45) NOT NULL,
+    device varchar(255),
+    created_at timestamp DEFAULT now() NOT NULL
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS course_resources (
+    id serial PRIMARY KEY NOT NULL,
+    course_id integer NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    title varchar(500) NOT NULL,
+    file_url varchar(1000) NOT NULL,
+    description text,
+    created_at timestamp DEFAULT now() NOT NULL
+  )`;
   await sql`CREATE TABLE IF NOT EXISTS lesson_resources (
     id serial PRIMARY KEY NOT NULL,
     lesson_id integer NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,

@@ -97,7 +97,19 @@ export const enrollments = pgTable("enrollments", {
   courseId: integer("course_id")
     .notNull()
     .references(() => courses.id, { onDelete: "cascade" }),
+  status: varchar("status", { length: 20 }).notNull().default("approved"), // pending | approved | rejected
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+});
+
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
+  ipAddress: varchar("ip_address", { length: 45 }).notNull(),
+  device: varchar("device", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const paymentRequests = pgTable("payment_requests", {
@@ -124,6 +136,18 @@ export const progress = pgTable("progress", {
     .notNull()
     .references(() => lessons.id, { onDelete: "cascade" }),
   completed: boolean("completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Course-level downloadable resources (ZIP, PDF, etc.) – only for enrolled students
+export const courseResources = pgTable("course_resources", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 500 }).notNull(),
+  fileUrl: varchar("file_url", { length: 1000 }).notNull(),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -167,8 +191,13 @@ export type NewCourse = typeof courses.$inferInsert;
 export type Lesson = typeof lessons.$inferSelect;
 export type NewLesson = typeof lessons.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
+export type NewEnrollment = typeof enrollments.$inferInsert;
+export type UserSession = typeof userSessions.$inferSelect;
+export type NewUserSession = typeof userSessions.$inferInsert;
 export type PaymentRequest = typeof paymentRequests.$inferSelect;
 export type Progress = typeof progress.$inferSelect;
+export type CourseResource = typeof courseResources.$inferSelect;
+export type NewCourseResource = typeof courseResources.$inferInsert;
 export type LessonResource = typeof lessonResources.$inferSelect;
 export type NewLessonResource = typeof lessonResources.$inferInsert;
 export type Review = typeof reviews.$inferSelect;

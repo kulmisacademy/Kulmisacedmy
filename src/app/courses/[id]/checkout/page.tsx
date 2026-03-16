@@ -3,7 +3,7 @@ import { eq, and } from "drizzle-orm";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 import { db } from "@/lib/db";
-import { courses, enrollments } from "@/lib/schema";
+import { courses, enrollments, paymentRequests } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
 import { CheckoutForm } from "./CheckoutForm";
 
@@ -44,7 +44,17 @@ export default async function CheckoutPage({
     .from(enrollments)
     .where(and(eq(enrollments.userId, session.userId), eq(enrollments.courseId, courseId)))
     .limit(1);
-  if (enrollment) redirect(`/courses/${courseId}`);
+  const enrollmentStatus = (enrollment as { status?: string } | undefined)?.status;
+  if (enrollment && enrollmentStatus === "approved") redirect(`/courses/${courseId}`);
+
+  const [pendingReq] = await db
+    .select()
+    .from(paymentRequests)
+    .where(and(eq(paymentRequests.userId, session.userId), eq(paymentRequests.courseId, courseId)))
+    .limit(1);
+  if (pendingReq && pendingReq.status === "pending") {
+    redirect(`/courses/${courseId}?pending=1`);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

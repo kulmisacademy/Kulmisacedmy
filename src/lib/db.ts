@@ -5,21 +5,30 @@ import * as schema from "./schema";
 const connectionString = process.env.DATABASE_URL;
 
 const _sql = connectionString ? neon(connectionString) : null;
-const _db = _sql ? drizzle(_sql, { schema }) : null;
+// Type assertion for @neondatabase/serverless and drizzle-orm version compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _db = _sql ? drizzle(_sql as any, { schema }) : null;
 
 const noDbError = new Error(
   "DATABASE_URL is not set. Add it to your .env file. Get it from https://console.neon.tech"
 );
 
 // Export db that throws only when used if DATABASE_URL is missing (so app can load)
-export const db = _db ?? (new Proxy({} as typeof _db, {
-  get() {
-    throw noDbError;
-  },
-}) as NonNullable<typeof _db>);
+type DbClient = NonNullable<typeof _db>;
+type SqlClient = NonNullable<typeof _sql>;
 
-export const sql = _sql ?? (new Proxy({} as typeof _sql, {
-  get() {
-    throw noDbError;
-  },
-}) as NonNullable<typeof _sql>);
+export const db: DbClient =
+  _db ??
+  (new Proxy({} as DbClient, {
+    get() {
+      throw noDbError;
+    },
+  }) as DbClient);
+
+export const sql: SqlClient =
+  _sql ??
+  (new Proxy({} as SqlClient, {
+    get() {
+      throw noDbError;
+    },
+  }) as SqlClient);

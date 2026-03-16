@@ -45,3 +45,12 @@ export async function sendResetLink(_prev: RequestResetState, formData: FormData
   if (!sent) return { error: "Failed to send email. Please try again later." };
   return { success: true };
 }
+
+/** Legacy: code-based verify. Use the reset link from email instead. */
+export type VerifyResetState = { error?: string; success?: boolean } | null;
+export async function verifyAndSetPassword(
+  _prev: VerifyResetState,
+  formData: FormData
+): Promise<VerifyResetState> {
+  return { error: "Please use the password reset link sent to your email." };
+}

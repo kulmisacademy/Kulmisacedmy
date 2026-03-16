@@ -19,7 +19,7 @@ export async function enrollFreeCourse(courseId: number) {
   if (existing) {
     redirect(`/courses/${courseId}`);
   }
-  await db.insert(enrollments).values({ userId: session.userId, courseId });
+  await db.insert(enrollments).values({ userId: session.userId, courseId, status: "approved" });
   redirect(`/courses/${courseId}`);
 }
 
@@ -86,7 +86,10 @@ export async function submitCourseReview(
     .from(enrollments)
     .where(and(eq(enrollments.userId, session.userId), eq(enrollments.courseId, courseId)))
     .limit(1);
-  if (!enrollment) return { error: "You must be enrolled in this course to submit a review." };
+  const status = (enrollment as { status?: string } | undefined)?.status;
+  if (!enrollment || status !== "approved") {
+    return { error: "You must be enrolled and approved in this course to submit a review." };
+  }
 
   const [existing] = await db
     .select()

@@ -4,10 +4,16 @@ import { useFormState } from "react-dom";
 import { replyToSupport } from "./actions";
 
 export function SupportReplyForm({ messageId }: { messageId: number }) {
-  const [, formAction] = useFormState(replyToSupport, null);
+  const [state, formAction] = useFormState(replyToSupport, null);
 
   return (
     <form action={formAction} className="mt-4">
+      {state?.error && (
+        <p className="mb-2 text-sm text-red-600 dark:text-red-400">{state.error}</p>
+      )}
+      {state?.success && (
+        <p className="mb-2 text-sm text-green-600 dark:text-green-400">Reply sent.</p>
+      )}
       <input type="hidden" name="messageId" value={messageId} />
       <label htmlFor={`reply-${messageId}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         Reply (sends email to student)

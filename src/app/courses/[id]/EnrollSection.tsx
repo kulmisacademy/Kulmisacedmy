@@ -21,6 +21,7 @@ type Props = {
   isLoggedIn: boolean;
   userName?: string;
   userPhone?: string | null;
+  hasPendingPayment?: boolean;
 };
 
 export function EnrollSection({
@@ -31,6 +32,7 @@ export function EnrollSection({
   isLoggedIn,
   userName = "",
   userPhone = "",
+  hasPendingPayment = false,
 }: Props) {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const isPaid = price != null && price > 0;
@@ -149,6 +151,14 @@ export function EnrollSection({
             </button>
           </div>
         </form>
+      </div>
+    );
+  }
+
+  if (isPaid && isLoggedIn && hasPendingPayment) {
+    return (
+      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+        Your request is pending admin approval. Please wait or contact support.
       </div>
     );
   }

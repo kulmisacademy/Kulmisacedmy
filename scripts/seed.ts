@@ -21,7 +21,9 @@ if (!DATABASE_URL) {
 }
 
 const sql = neon(DATABASE_URL);
-const db = drizzle(sql, { schema });
+// Type assertion for neon/drizzle-orm version compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = drizzle(sql as any, { schema });
 
 async function seed() {
   console.log("Seeding admin user...");

@@ -15,7 +15,7 @@ export async function approvePaymentRequest(requestId: number) {
     .where(and(eq(enrollments.userId, req.userId), eq(enrollments.courseId, req.courseId)))
     .limit(1);
   if (!existing) {
-    await db.insert(enrollments).values({ userId: req.userId, courseId: req.courseId });
+    await db.insert(enrollments).values({ userId: req.userId, courseId: req.courseId, status: "approved" });
   }
   revalidatePath("/admin/dashboard/payment-requests");
 }

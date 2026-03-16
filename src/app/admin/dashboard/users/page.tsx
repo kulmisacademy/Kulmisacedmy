@@ -14,15 +14,16 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const { q } = await searchParams;
   const query = (q ?? "").trim();
 
+  const pattern = `%${query}%`;
   const allUsers = query
     ? await db
         .select()
         .from(users)
         .where(
           or(
-            ilike(users.name, `%${query}%`),
-            ilike(users.email, `%${query}%`),
-            ilike(sql`COALESCE(${users.phone}, '')`, `%${query}%`)
+            ilike(users.name, pattern),
+            ilike(users.email, pattern),
+            sql`COALESCE(${users.phone}, '')::text ILIKE ${pattern}`
           )
         )
         .orderBy(desc(users.createdAt))

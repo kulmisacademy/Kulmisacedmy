@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 import { db } from "@/lib/db";
-import { courses, lessons, enrollments, users, reviews } from "@/lib/schema";
+import { courses, lessons, enrollments, users, reviews, courseResources, paymentRequests } from "@/lib/schema";
 import { eq, asc, and } from "drizzle-orm";
+import { CourseResourcesBlock } from "./CourseResourcesBlock";
 import { getSession } from "@/lib/auth";
 import { EnrollSection } from "./EnrollSection";
 import { CourseThumbnail } from "./CourseThumbnail";
@@ -25,10 +26,13 @@ function formatPrice(price: number | null): string {
 
 export default async function CourseDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ message?: string; pending?: string }>;
 }) {
   const { id } = await params;
+  const { message: messageParam, pending: pendingParam } = await searchParams;
   const courseId = parseInt(id, 10);
   if (isNaN(courseId)) notFound();
 
@@ -38,13 +42,26 @@ export default async function CourseDetailPage({
   const session = await getSession();
   let isEnrolled = false;
   let userPhone: string | null = null;
+  let hasPendingPayment = false;
   if (session) {
     const [enrollment] = await db
       .select()
       .from(enrollments)
       .where(and(eq(enrollments.userId, session.userId), eq(enrollments.courseId, courseId)))
       .limit(1);
-    isEnrolled = !!enrollment;
+    const enrollmentStatus = (enrollment as { status?: string } | undefined)?.status ?? "approved";
+    isEnrolled = !!enrollment && enrollmentStatus === "approved";
+    const [pendingReq] = await db
+      .select()
+      .from(paymentRequests)
+      .where(
+        and(
+          eq(paymentRequests.userId, session.userId),
+          eq(paymentRequests.courseId, courseId)
+        )
+      )
+      .limit(1);
+    hasPendingPayment = !!pendingReq && pendingReq.status === "pending";
     const [userRow] = await db.select({ phone: users.phone }).from(users).where(eq(users.id, session.userId)).limit(1);
     userPhone = userRow?.phone ?? null;
   }
@@ -62,20 +79,23 @@ export default async function CourseDetailPage({
         .filter(Boolean)
     : [];
 
-  const approvedReviews = await db
-    .select({
-      id: reviews.id,
-      userId: reviews.userId,
-      courseId: reviews.courseId,
-      rating: reviews.rating,
-      reviewText: reviews.reviewText,
-      status: reviews.status,
-      createdAt: reviews.createdAt,
-      userName: users.name,
-    })
-    .from(reviews)
-    .innerJoin(users, eq(reviews.userId, users.id))
-    .where(and(eq(reviews.courseId, courseId), eq(reviews.status, "approved")));
+  const [approvedReviews, resourcesList] = await Promise.all([
+    db
+      .select({
+        id: reviews.id,
+        userId: reviews.userId,
+        courseId: reviews.courseId,
+        rating: reviews.rating,
+        reviewText: reviews.reviewText,
+        status: reviews.status,
+        createdAt: reviews.createdAt,
+        userName: users.name,
+      })
+      .from(reviews)
+      .innerJoin(users, eq(reviews.userId, users.id))
+      .where(and(eq(reviews.courseId, courseId), eq(reviews.status, "approved"))),
+    db.select().from(courseResources).where(eq(courseResources.courseId, courseId)),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -91,6 +111,13 @@ export default async function CourseDetailPage({
               <div>
                 <CourseThumbnail src={course.thumbnail} title={course.title} subtitle={course.description ? course.description.slice(0, 100).trim() + (course.description.length > 100 ? "…" : "") : undefined} />
                 <p className="mt-4 text-2xl font-bold text-gray-900">{formatPrice(course.price)}</p>
+                {((messageParam === "enroll" && !isEnrolled) || pendingParam === "1") && (
+                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                    {pendingParam === "1"
+                      ? "Your request is pending admin approval. Please wait or contact support."
+                      : "You must enroll in this course before watching lessons."}
+                  </div>
+                )}
                 <EnrollSection
                   courseId={courseId}
                   courseTitle={course.title}
@@ -99,6 +126,7 @@ export default async function CourseDetailPage({
                   isLoggedIn={!!session}
                   userName={session?.name}
                   userPhone={userPhone}
+                  hasPendingPayment={hasPendingPayment}
                 />
               </div>
               <div>
@@ -189,6 +217,10 @@ export default async function CourseDetailPage({
               </ul>
             )}
           </div>
+
+          {isEnrolled && resourcesList.length > 0 && (
+            <CourseResourcesBlock resources={resourcesList} />
+          )}
 
           {isEnrolled && (
             <div className="mt-10">

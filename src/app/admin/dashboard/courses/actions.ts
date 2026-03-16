@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { courses, lessons, lessonResources } from "@/lib/schema";
-import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadLessonResource } from "@/lib/upload";
+import { courses, lessons, lessonResources, courseResources } from "@/lib/schema";
+import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadLessonResource, saveCourseResourceLocal } from "@/lib/upload";
 
 export type CreateCourseState = { error?: string } | null;
 
@@ -234,7 +234,12 @@ export async function addLessonResource(
   let fileUrl: string | null = null;
   if (resourceType === "file" && file && file.size > 0) {
     fileUrl = await uploadLessonResource(file);
-    if (!fileUrl) return { error: "File upload failed. Check file type/size or BLOB_READ_WRITE_TOKEN." };
+    if (!fileUrl) {
+      return {
+        error:
+          "File upload failed. Use allowed types (PDF, ZIP, images, text, etc.) and max 10MB. If using Vercel Blob, set BLOB_READ_WRITE_TOKEN.",
+      };
+    }
   } else if (resourceType === "link" && resourceUrl) {
     fileUrl = resourceUrl;
   }
@@ -257,4 +262,52 @@ export async function addLessonResource(
 export async function deleteLessonResource(resourceId: number, lessonId: number, courseId: number) {
   await db.delete(lessonResources).where(eq(lessonResources.id, resourceId));
   redirect(`/admin/dashboard/courses/${courseId}/lessons/${lessonId}/edit`);
+}
+
+// ——— Course Resources (course-level downloadable files) ———
+
+export type AddCourseResourceState = { error?: string } | null;
+
+export async function addCourseResource(
+  courseId: number,
+  _prevState: AddCourseResourceState,
+  formData: FormData
+): Promise<AddCourseResourceState> {
+  const title = formData.get("resourceTitle")?.toString()?.trim();
+  const description = formData.get("resourceDescription")?.toString()?.trim() || null;
+  const file = formData.get("resourceFile") instanceof File ? (formData.get("resourceFile") as File) : null;
+
+  if (!title) return { error: "Resource title is required." };
+  if (!file || file.size === 0) return { error: "Please select a file to upload." };
+
+  const fileUrl = await saveCourseResourceLocal(file);
+  if (!fileUrl) {
+    return {
+      error:
+        "File upload failed. Allowed: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max size 100MB.",
+    };
+  }
+
+  try {
+    await db.insert(courseResources).values({
+      courseId,
+      title,
+      fileUrl,
+      description,
+    });
+  } catch (err) {
+    console.error(err);
+    return { error: "Failed to add resource." };
+  }
+  redirect(`/admin/dashboard/courses/${courseId}/edit`);
+}
+
+export async function deleteCourseResource(formData: FormData) {
+  const idRaw = formData.get("resourceId")?.toString();
+  const courseIdRaw = formData.get("courseId")?.toString();
+  const resourceId = idRaw ? parseInt(idRaw, 10) : NaN;
+  const courseId = courseIdRaw ? parseInt(courseIdRaw, 10) : NaN;
+  if (isNaN(resourceId) || isNaN(courseId)) return;
+  await db.delete(courseResources).where(eq(courseResources.id, resourceId));
+  redirect(`/admin/dashboard/courses/${courseId}/edit`);
 }

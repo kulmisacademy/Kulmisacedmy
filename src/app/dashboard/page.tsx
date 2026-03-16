@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 import { count } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -25,7 +25,7 @@ export default async function MyCoursesPage() {
     })
     .from(enrollments)
     .innerJoin(courses, eq(enrollments.courseId, courses.id))
-    .where(eq(enrollments.userId, session.userId));
+    .where(and(eq(enrollments.userId, session.userId), eq(enrollments.status, "approved")));
 
   const lessonCounts = await db
     .select({ courseId: lessons.courseId, count: count() })

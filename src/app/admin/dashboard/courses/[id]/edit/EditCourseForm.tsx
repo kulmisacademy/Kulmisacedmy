@@ -17,16 +17,25 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add IMAGEKIT_PRIVATE_KEY for ImageKit, or BLOB_READ_WRITE_TOKEN for Vercel Blob, in Settings → Environment Variables, then redeploy. Check function logs for the exact error.",
 };
 
+const THUMBNAIL_WARNING =
+  "Thumbnail could not be uploaded. Course was saved. To enable uploads on Vercel: add IMAGEKIT_PRIVATE_KEY or BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy.";
+
 export function EditCourseForm({
   course,
   categories,
   errorParam,
+  savedParam,
+  warningParam,
 }: {
   course: Course;
   categories: Category[];
   errorParam?: string;
+  savedParam?: string;
+  warningParam?: string;
 }) {
   const errorMessage = errorParam ? (ERROR_MESSAGES[errorParam] ?? `Something went wrong. (${errorParam})`) : null;
+  const showSaved = savedParam === "1";
+  const showThumbnailWarning = warningParam === "thumbnail";
 
   return (
     <form
@@ -35,6 +44,16 @@ export function EditCourseForm({
       encType="multipart/form-data"
       className="mt-6 space-y-6"
     >
+      {showSaved && (
+        <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-300">
+          Course saved.
+        </p>
+      )}
+      {showThumbnailWarning && (
+        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+          {THUMBNAIL_WARNING}
+        </p>
+      )}
       {errorMessage && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
           {errorMessage}

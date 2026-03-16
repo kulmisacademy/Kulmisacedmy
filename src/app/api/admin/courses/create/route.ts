@@ -84,9 +84,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (thumbnailFailed) {
-    const errParam = thumbnailErrorCode === "no_token" ? "thumbnail_no_token" : thumbnailErrorCode ?? "thumbnail";
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/new?error=${errParam}`, request.url)
+      new URL("/admin/dashboard/courses?created=1&warning=thumbnail", request.url)
     );
   }
   return NextResponse.redirect(new URL("/admin/dashboard/courses", request.url));

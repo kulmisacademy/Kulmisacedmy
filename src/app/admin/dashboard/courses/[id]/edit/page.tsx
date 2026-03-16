@@ -13,10 +13,10 @@ export default async function AdminEditCoursePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; warning?: string }>;
 }) {
   const { id } = await params;
-  const { error: errorParam } = await searchParams;
+  const { error: errorParam, saved: savedParam, warning: warningParam } = await searchParams;
   const courseId = parseInt(id, 10);
   if (isNaN(courseId)) notFound();
 
@@ -49,7 +49,7 @@ export default async function AdminEditCoursePage({
         ← Back to course
       </Link>
       <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Edit course</h1>
-      <EditCourseForm course={course} categories={categoriesList} errorParam={errorParam} />
+      <EditCourseForm course={course} categories={categoriesList} errorParam={errorParam} savedParam={savedParam} warningParam={warningParam} />
       <CourseResourcesSection courseId={courseId} resources={resourcesList} />
     </div>
   );

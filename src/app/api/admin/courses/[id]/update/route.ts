@@ -106,9 +106,9 @@ export async function POST(
 
   const base = new URL("/admin/dashboard/courses", request.url);
   if (thumbnailFailed) {
-    const errParam = thumbnailErrorCode === "no_token" ? "thumbnail_no_token" : thumbnailErrorCode ?? "thumbnail";
+    // Course is saved; show success + thumbnail warning instead of blocking error
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=${errParam}`, request.url)
+      new URL(`/admin/dashboard/courses/${courseId}/edit?saved=1&warning=thumbnail`, request.url)
     );
   }
   return NextResponse.redirect(base.toString());

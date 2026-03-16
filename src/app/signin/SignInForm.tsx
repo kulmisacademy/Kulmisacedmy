@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import Link from "next/link";
 import { signIn } from "./actions";
 
 export function SignInForm({ returnTo = "" }: { returnTo?: string }) {
@@ -41,11 +40,6 @@ export function SignInForm({ returnTo = "" }: { returnTo?: string }) {
       >
         Sign in
       </button>
-      <p className="text-center text-sm text-gray-500">
-        <Link href="/admin" className="text-primary-600 hover:underline">
-          Sign in as Admin
-        </Link>
-      </p>
     </form>
   );
 }

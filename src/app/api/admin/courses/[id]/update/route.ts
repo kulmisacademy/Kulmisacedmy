@@ -5,6 +5,8 @@ import { courses } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
 import { saveCourseThumbnailLocal, uploadCourseThumbnail } from "@/lib/upload";
 
+export const runtime = "nodejs";
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -58,14 +60,21 @@ export async function POST(
   let thumbnail: string | null = existingThumbnail;
 
   let thumbnailFailed = false;
+  let thumbnailErrorCode: "no_token" | "upload_failed" | null = null;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
     const isVercel = process.env.VERCEL === "1";
     const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
-    if (isVercel && hasBlobToken) {
+    if (isVercel && !hasBlobToken) {
+      thumbnailFailed = true;
+      thumbnailErrorCode = "no_token";
+    } else if (isVercel && hasBlobToken) {
       const blobUrl = await uploadCourseThumbnail(file);
       if (blobUrl) thumbnail = blobUrl;
-      else thumbnailFailed = true;
+      else {
+        thumbnailFailed = true;
+        thumbnailErrorCode = "upload_failed";
+      }
     } else {
       const localPath = await saveCourseThumbnailLocal(file);
       if (localPath) {
@@ -73,7 +82,10 @@ export async function POST(
       } else {
         const blobUrl = await uploadCourseThumbnail(file);
         if (blobUrl) thumbnail = blobUrl;
-        else thumbnailFailed = true;
+        else {
+          thumbnailFailed = true;
+          thumbnailErrorCode = "upload_failed";
+        }
       }
     }
   }
@@ -100,8 +112,9 @@ export async function POST(
 
   const base = new URL("/admin/dashboard/courses", request.url);
   if (thumbnailFailed) {
+    const errParam = thumbnailErrorCode === "no_token" ? "thumbnail_no_token" : "thumbnail";
     return NextResponse.redirect(
-      new URL(`/admin/dashboard/courses/${courseId}/edit?error=thumbnail`, request.url)
+      new URL(`/admin/dashboard/courses/${courseId}/edit?error=${errParam}`, request.url)
     );
   }
   return NextResponse.redirect(base.toString());

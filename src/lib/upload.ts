@@ -104,7 +104,8 @@ export async function uploadCourseThumbnail(
     });
     return blob.url;
   } catch (err) {
-    console.error("[upload] Vercel Blob upload failed:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[upload] Vercel Blob upload failed:", msg);
     return null;
   }
 }

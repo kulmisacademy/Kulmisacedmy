@@ -7,8 +7,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   title: "Title is required.",
   upload: "Failed to read form. Please try again.",
   save: "Failed to save. Please try again.",
+  thumbnail_no_token:
+    "BLOB_READ_WRITE_TOKEN is not set. In Vercel: Project Settings → Environment Variables → add BLOB_READ_WRITE_TOKEN with the token value only (no quotes), then redeploy.",
   thumbnail:
-    "Thumbnail could not be saved. Use a JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Project Settings → Environment Variables (paste only the token value, no quotes), create a Blob store in Storage if needed, then redeploy.",
+    "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: create a Blob store (Storage → Blob), link it to this project, ensure BLOB_READ_WRITE_TOKEN is set, then redeploy. Check Vercel function logs for the exact error.",
 };
 
 export function CreateCourseForm({

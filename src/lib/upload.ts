@@ -20,15 +20,20 @@ const EXT_BY_TYPE: Record<string, string> = {
  * Works when running locally (e.g. npm run dev / Node server).
  * Returns path like /uploads/courses/course-1234567890-abc12.jpg for storing in DB.
  */
+const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+
 export async function saveCourseThumbnailLocal(
   file: File | null
 ): Promise<string | null> {
   if (!file || file.size === 0) return null;
   if (file.size > MAX_SIZE) return null;
-  if (!IMAGE_TYPES.includes(file.type)) return null;
+  const extFromName = path.extname(file.name).slice(1).toLowerCase();
+  const allowedByMime = IMAGE_TYPES.includes(file.type);
+  const allowedByExt = extFromName && IMAGE_EXT.has(extFromName);
+  if (!allowedByMime && !allowedByExt) return null;
 
   try {
-    const ext = EXT_BY_TYPE[file.type] ?? (path.extname(file.name).slice(1) || "jpg");
+    const ext = EXT_BY_TYPE[file.type] ?? (extFromName || "jpg");
     const name = `course-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
     const dir = path.join(process.cwd(), UPLOAD_DIR);
     await mkdir(dir, { recursive: true });

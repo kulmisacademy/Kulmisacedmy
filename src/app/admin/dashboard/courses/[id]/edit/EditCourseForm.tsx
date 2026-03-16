@@ -76,6 +76,15 @@ export function EditCourseForm({ course, categories }: { course: Course; categor
       </div>
       <div>
         <label htmlFor="thumbnailFile" className="block text-sm font-medium text-gray-700">Course Thumbnail</label>
+        {course.thumbnail && (
+          <div className="mt-1 mb-2">
+            <p className="text-xs text-gray-500 mb-1">Current thumbnail:</p>
+            <div className="relative h-24 w-40 rounded-lg border border-gray-200 overflow-hidden bg-gray-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={course.thumbnail} alt="" className="h-full w-full object-cover" />
+            </div>
+          </div>
+        )}
         <input
           id="thumbnailFile"
           name="thumbnailFile"
@@ -83,7 +92,7 @@ export function EditCourseForm({ course, categories }: { course: Course; categor
           accept="image/jpeg,image/png,image/webp,image/gif"
           className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-200"
         />
-        <p className="mt-1 text-xs text-gray-500">Upload a new image to replace the thumbnail. Leave empty to keep the current thumbnail.</p>
+        <p className="mt-1 text-xs text-gray-500">Upload a new image to replace the thumbnail. Leave empty to keep the current thumbnail. Max 4 MB.</p>
       </div>
       <div>
         <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>

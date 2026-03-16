@@ -17,7 +17,8 @@
     "db:migrate": "tsx scripts/migrate-add-course-fields.ts",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts",
-    "db:ensure-admin": "tsx scripts/ensure-admin.ts"
+    "db:ensure-admin": "tsx scripts/ensure-admin.ts",
+    "db:delete-all-courses": "tsx scripts/delete-all-courses.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.4",

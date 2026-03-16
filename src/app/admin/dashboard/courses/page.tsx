@@ -30,23 +30,35 @@ export default async function AdminCoursesPage() {
         <p className="mt-6 text-gray-600">No courses yet. Create your first course to get started.</p>
       ) : (
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+          <table className="min-w-full divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Course Title</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Lessons</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Price</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Created</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Actions</th>
+              <tr className="bg-gray-50 dark:bg-gray-700/50">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Course</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Lessons</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Price</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Created</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {allCourses.map((c) => (
-                <tr key={c.id}>
+                <tr key={c.id} className="dark:bg-gray-800">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/dashboard/courses/${c.id}`} className="font-medium text-gray-900 hover:text-primary-600 hover:underline">
-                      {c.title}
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-600">
+                        {c.thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={c.thumbnail} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-sm font-bold text-gray-400">
+                            {c.title.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <Link href={`/admin/dashboard/courses/${c.id}`} className="font-medium text-gray-900 dark:text-white hover:text-primary-600 hover:underline">
+                        {c.title}
+                      </Link>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600">{countMap[c.id] ?? 0}</td>
                   <td className="px-4 py-3 text-gray-600">{c.price == null || c.price === 0 ? "Free" : `$${c.price}`}</td>

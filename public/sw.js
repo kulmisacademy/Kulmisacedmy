@@ -6,13 +6,22 @@
 
 const CACHE_NAME = "kulmis-academy-v1";
 
-// Add important routes and static assets here.
-// Keep this list minimal to avoid install failures if a route 404s.
-const PRECACHE_URLS = ["/", "/favicon.ico", "/manifest.webmanifest"];
+// Precache these if they exist. If any fail (e.g. 404), install still succeeds.
+const PRECACHE_URLS = ["/", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(
+        PRECACHE_URLS.map((url) =>
+          fetch(url, { mode: "same-origin" })
+            .then((res) => {
+              if (res.ok) return cache.put(new Request(url, { mode: "same-origin" }), res);
+            })
+            .catch(() => {})
+        )
+      )
+    )
   );
   self.skipWaiting();
 });

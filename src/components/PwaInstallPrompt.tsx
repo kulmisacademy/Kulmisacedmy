@@ -43,9 +43,11 @@ export function PwaInstallPrompt() {
 
   async function handleInstall() {
     if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
     try {
+      await deferredPrompt.prompt();
       await deferredPrompt.userChoice;
+    } catch {
+      // prompt() can throw if already shown or not user-activated
     } finally {
       setDeferredPrompt(null);
       setVisible(false);

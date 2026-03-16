@@ -60,7 +60,7 @@ export async function POST(
   let thumbnail: string | null = existingThumbnail;
 
   let thumbnailFailed = false;
-  let thumbnailErrorCode: "no_token" | "upload_failed" | null = null;
+  let thumbnailErrorCode: "no_token" | "upload_failed" | "thumbnail_imagekit" | null = null;
   const file = formData.get("thumbnailFile");
   if (file instanceof File && file.size > 0) {
     const hasImageKit = Boolean(process.env.IMAGEKIT_PRIVATE_KEY?.trim());
@@ -78,7 +78,9 @@ export async function POST(
     if (url) thumbnail = url;
     else {
       thumbnailFailed = true;
-      thumbnailErrorCode = isVercel && !hasBlobToken && !hasImageKit ? "no_token" : "upload_failed";
+      if (hasImageKit) thumbnailErrorCode = "thumbnail_imagekit";
+      else if (isVercel && !hasBlobToken) thumbnailErrorCode = "no_token";
+      else thumbnailErrorCode = "upload_failed";
     }
   }
 
@@ -104,7 +106,7 @@ export async function POST(
 
   const base = new URL("/admin/dashboard/courses", request.url);
   if (thumbnailFailed) {
-    const errParam = thumbnailErrorCode === "no_token" ? "thumbnail_no_token" : "thumbnail";
+    const errParam = thumbnailErrorCode === "no_token" ? "thumbnail_no_token" : thumbnailErrorCode ?? "thumbnail";
     return NextResponse.redirect(
       new URL(`/admin/dashboard/courses/${courseId}/edit?error=${errParam}`, request.url)
     );

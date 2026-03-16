@@ -9,8 +9,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   save: "Failed to save. Please try again.",
   thumbnail_no_token:
     "BLOB_READ_WRITE_TOKEN is not set. In Vercel: Project Settings → Environment Variables → add BLOB_READ_WRITE_TOKEN with the token value only (no quotes), then redeploy.",
+  thumbnail_imagekit:
+    "ImageKit upload failed. On Vercel: add IMAGEKIT_PRIVATE_KEY (and optionally IMAGEKIT_URL_ENDPOINT) in Settings → Environment Variables, then redeploy. Use JPEG, PNG, WebP or GIF under 4 MB. Check function logs for “[upload] ImageKit upload failed” for the exact error.",
   thumbnail:
-    "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: create a Blob store (Storage → Blob), link it to this project, ensure BLOB_READ_WRITE_TOKEN is set, then redeploy. Check Vercel function logs for the exact error.",
+    "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add IMAGEKIT_PRIVATE_KEY for ImageKit, or BLOB_READ_WRITE_TOKEN for Vercel Blob, in Settings → Environment Variables, then redeploy. Check function logs for the exact error.",
 };
 
 export function CreateCourseForm({

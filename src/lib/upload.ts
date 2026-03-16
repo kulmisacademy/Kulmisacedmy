@@ -88,8 +88,11 @@ export async function uploadCourseThumbnailImageKit(
       file: fileForUpload,
       fileName,
       folder: "courses",
-    });
-    const url = (res as { url?: string }).url;
+    }) as { url?: string; filePath?: string };
+    const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT?.trim();
+    const url = res.url ?? (urlEndpoint && res.filePath
+      ? `${urlEndpoint.replace(/\/$/, "")}${res.filePath}`
+      : null);
     return url ?? null;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

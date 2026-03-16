@@ -11,6 +11,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     "BLOB_READ_WRITE_TOKEN is not set. In Vercel: Project Settings → Environment Variables → add BLOB_READ_WRITE_TOKEN with the token value only (no quotes), then redeploy.",
   thumbnail_imagekit:
     "ImageKit upload failed. On Vercel: add IMAGEKIT_PRIVATE_KEY (and optionally IMAGEKIT_URL_ENDPOINT) in Settings → Environment Variables, then redeploy. Use JPEG, PNG, WebP or GIF under 4 MB. Check function logs for “[upload] ImageKit upload failed” for the exact error.",
+  upload_failed:
+    "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add IMAGEKIT_PRIVATE_KEY or BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy. Check function logs for the exact error.",
   thumbnail:
     "Thumbnail upload failed. Use JPEG, PNG, WebP or GIF under 4 MB. On Vercel: add IMAGEKIT_PRIVATE_KEY for ImageKit, or BLOB_READ_WRITE_TOKEN for Vercel Blob, in Settings → Environment Variables, then redeploy. Check function logs for the exact error.",
 };
@@ -22,7 +24,7 @@ export function CreateCourseForm({
   categories: Category[];
   errorParam?: string;
 }) {
-  const errorMessage = errorParam ? ERROR_MESSAGES[errorParam] ?? "Something went wrong." : null;
+  const errorMessage = errorParam ? (ERROR_MESSAGES[errorParam] ?? `Something went wrong. (${errorParam})`) : null;
 
   return (
     <form

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
 import { enrollFreeCourse, submitPaymentRequest } from "./actions";
 import { CONTACT_PHONE, WHATSAPP_URL } from "@/lib/constants";
@@ -35,9 +36,39 @@ export function EnrollSection({
   hasPendingPayment = false,
 }: Props) {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [enrollPending, setEnrollPending] = useState(false);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
+  const router = useRouter();
   const isPaid = price != null && price > 0;
 
   const [paymentState, paymentFormAction] = useFormState(submitPaymentRequest, null);
+
+  useEffect(() => {
+    if (paymentState?.success) router.refresh();
+  }, [paymentState?.success, router]);
+
+  async function handleFreeEnroll() {
+    if (enrollPending) return;
+    setEnrollPending(true);
+    setEnrollError(null);
+    try {
+      const result = await enrollFreeCourse(courseId);
+      if (result.ok) {
+        router.refresh();
+        router.push(result.redirectTo);
+        return;
+      }
+      if ("redirectTo" in result && result.redirectTo) {
+        window.location.href = result.redirectTo;
+        return;
+      }
+      setEnrollError("Failed to enroll. Please try again.");
+    } catch {
+      setEnrollError("Something went wrong. Please try again.");
+    } finally {
+      setEnrollPending(false);
+    }
+  }
 
   function handleEnrollClick() {
     if (isEnrolled) return;
@@ -186,13 +217,20 @@ export function EnrollSection({
     );
   }
   return (
-    <form action={enrollFreeCourse.bind(null, courseId)}>
+    <div className="mt-4">
+      {enrollError && (
+        <p className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+          {enrollError}
+        </p>
+      )}
       <button
-        type="submit"
-        className="mt-4 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
+        type="button"
+        onClick={handleFreeEnroll}
+        disabled={enrollPending}
+        className="mt-4 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white hover:bg-primary-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Enroll now (free)
+        {enrollPending ? "Enrolling…" : "Enroll now (free)"}
       </button>
-    </form>
+    </div>
   );
 }

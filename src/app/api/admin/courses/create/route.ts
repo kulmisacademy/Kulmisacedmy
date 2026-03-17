@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { courses } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
 import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadCourseThumbnailImageKit } from "@/lib/upload";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -82,6 +84,9 @@ export async function POST(request: NextRequest) {
       new URL("/admin/dashboard/courses/new?error=save", request.url)
     );
   }
+
+  revalidatePath("/courses");
+  revalidatePath("/admin/dashboard/courses");
 
   if (thumbnailFailed) {
     return NextResponse.redirect(

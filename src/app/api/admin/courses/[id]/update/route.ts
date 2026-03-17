@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses } from "@/lib/schema";
@@ -6,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadCourseThumbnailImageKit } from "@/lib/upload";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(
   request: NextRequest,
@@ -103,6 +105,12 @@ export async function POST(
       new URL(`/admin/dashboard/courses/${courseId}/edit?error=save`, request.url)
     );
   }
+
+  revalidatePath("/courses");
+  revalidatePath(`/courses/${courseId}`);
+  revalidatePath("/admin/dashboard/courses");
+  revalidatePath(`/admin/dashboard/courses/${courseId}/edit`);
+  revalidatePath(`/admin/dashboard/courses/${courseId}`);
 
   const base = new URL("/admin/dashboard/courses", request.url);
   if (thumbnailFailed) {

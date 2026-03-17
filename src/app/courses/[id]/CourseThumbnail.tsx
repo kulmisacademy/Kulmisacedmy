@@ -13,11 +13,15 @@ export function CourseThumbnail({ src, title }: Props) {
   const showImage = src && src.trim() !== "" && !imageFailed;
 
   if (showImage) {
+    const cacheBustedSrc =
+      src && (src.startsWith("http") || src.startsWith("/"))
+        ? `${src}${src.includes("?") ? "&" : "?"}v=${encodeURIComponent(src)}`
+        : src;
     return (
       <div className="relative aspect-video w-full min-h-[140px] overflow-hidden rounded-t-xl bg-gray-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={cacheBustedSrc}
           alt=""
           className="h-full w-full object-cover"
           onError={() => setImageFailed(true)}

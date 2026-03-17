@@ -1,16 +1,17 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { enrollments, paymentRequests, courses, reviews } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
 
-export async function enrollFreeCourse(courseId: number) {
+export type EnrollFreeResult = { ok: true; redirectTo: string } | { ok: false; redirectTo: string } | { ok: false; error: string };
+
+export async function enrollFreeCourse(courseId: number): Promise<EnrollFreeResult> {
   const session = await getSession();
   if (!session) {
-    redirect(`/register?returnTo=${encodeURIComponent(`/courses/${courseId}`)}`);
+    return { ok: false, redirectTo: `/register?returnTo=${encodeURIComponent(`/courses/${courseId}`)}` };
   }
   const [existing] = await db
     .select()
@@ -18,12 +19,12 @@ export async function enrollFreeCourse(courseId: number) {
     .where(and(eq(enrollments.userId, session.userId), eq(enrollments.courseId, courseId)))
     .limit(1);
   if (existing) {
-    redirect(`/courses/${courseId}`);
+    return { ok: true, redirectTo: `/courses/${courseId}` };
   }
   await db.insert(enrollments).values({ userId: session.userId, courseId, status: "approved" });
   revalidatePath("/dashboard");
   revalidatePath(`/courses/${courseId}`);
-  redirect(`/courses/${courseId}`);
+  return { ok: true, redirectTo: `/courses/${courseId}` };
 }
 
 export type SubmitPaymentState = { error?: string; success?: boolean } | null;
@@ -60,6 +61,7 @@ export async function submitPaymentRequest(
       note,
       status: "pending",
     });
+    revalidatePath(`/courses/${courseId}`);
     return { success: true };
   } catch (err) {
     console.error("Payment request insert failed:", err);

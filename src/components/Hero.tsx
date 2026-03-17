@@ -58,7 +58,7 @@ export default function Hero() {
                 ))}
               </div>
               <p className="text-xs sm:text-sm text-white/85">
-                Trusted by <strong>10,000+</strong> students worldwide
+                Trusted by <strong>300+</strong> students in Somalia and worldwide
               </p>
             </div>
           </div>

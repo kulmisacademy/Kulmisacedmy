@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { enrollments, paymentRequests, courses, reviews } from "@/lib/schema";
@@ -20,6 +21,8 @@ export async function enrollFreeCourse(courseId: number) {
     redirect(`/courses/${courseId}`);
   }
   await db.insert(enrollments).values({ userId: session.userId, courseId, status: "approved" });
+  revalidatePath("/dashboard");
+  revalidatePath(`/courses/${courseId}`);
   redirect(`/courses/${courseId}`);
 }
 

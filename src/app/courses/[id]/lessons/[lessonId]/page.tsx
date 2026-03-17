@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { eq, asc, and, desc } from "drizzle-orm";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
@@ -20,6 +20,43 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
+function LessonNotFoundMessage({ courseId, isCourseMissing }: { courseId?: number; isCourseMissing?: boolean }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <HeaderWithSession />
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="max-w-md rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-900/20">
+          <h1 className="text-xl font-bold text-amber-800 dark:text-amber-200">
+            {isCourseMissing ? "Course not found" : "Lesson not found"}
+          </h1>
+          <p className="mt-3 text-amber-700 dark:text-amber-300">
+            {isCourseMissing
+              ? "This course may have been removed or the link is incorrect."
+              : "This lesson may have been removed or the link is incorrect. Try opening the course and choosing a lesson from the list."}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {courseId && (
+              <Link
+                href={`/courses/${courseId}`}
+                className="inline-block rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600"
+              >
+                Back to course
+              </Link>
+            )}
+            <Link
+              href="/courses"
+              className="inline-block rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:bg-gray-800 dark:text-amber-200 dark:hover:bg-amber-900/30"
+            >
+              Browse courses
+            </Link>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 function formatDuration(minutes: number | null): string {
   if (minutes == null) return "";
   const m = Math.floor(minutes);
@@ -34,10 +71,14 @@ export default async function LessonPlayerPage({
   const { id, lessonId } = await params;
   const courseId = parseInt(id, 10);
   const lessonIdNum = parseInt(lessonId, 10);
-  if (isNaN(courseId) || isNaN(lessonIdNum)) notFound();
+  if (isNaN(courseId) || isNaN(lessonIdNum)) {
+    return <LessonNotFoundMessage />;
+  }
 
   const [course] = await db.select().from(courses).where(eq(courses.id, courseId)).limit(1);
-  if (!course) notFound();
+  if (!course) {
+    return <LessonNotFoundMessage isCourseMissing />;
+  }
 
   const allLessons = await db
     .select()
@@ -47,7 +88,9 @@ export default async function LessonPlayerPage({
 
   const currentIndex = allLessons.findIndex((l) => l.id === lessonIdNum);
   const currentLesson = currentIndex >= 0 ? allLessons[currentIndex] : null;
-  if (!currentLesson) notFound();
+  if (!currentLesson) {
+    return <LessonNotFoundMessage courseId={courseId} />;
+  }
 
   const session = await getSession();
 

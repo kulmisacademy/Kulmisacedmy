@@ -18,6 +18,8 @@ export async function approvePaymentRequest(requestId: number) {
     await db.insert(enrollments).values({ userId: req.userId, courseId: req.courseId, status: "approved" });
   }
   revalidatePath("/admin/dashboard/payment-requests");
+  revalidatePath("/dashboard");
+  revalidatePath(`/courses/${req.courseId}`);
 }
 
 export async function rejectPaymentRequest(requestId: number) {

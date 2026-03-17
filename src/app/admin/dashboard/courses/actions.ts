@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses, lessons, lessonResources, courseResources } from "@/lib/schema";
+import { normalizeVideoUrlForStorage } from "@/lib/video";
 import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadLessonResource, saveCourseResourceLocal, uploadCourseResource } from "@/lib/upload";
 
 export type CreateCourseState = { error?: string } | null;
@@ -121,7 +122,8 @@ export async function addLesson(
 ): Promise<CreateCourseState> {
   const title = formData.get("title")?.toString()?.trim();
   const description = formData.get("description")?.toString()?.trim() || null;
-  const videoUrl = formData.get("videoUrl")?.toString()?.trim() || null;
+  const videoUrlRaw = formData.get("videoUrl")?.toString()?.trim() || null;
+  const videoUrl = normalizeVideoUrlForStorage(videoUrlRaw) ?? videoUrlRaw;
   const durationRaw = formData.get("duration")?.toString()?.trim();
   const orderRaw = formData.get("lessonOrder")?.toString()?.trim();
   const isPreview = formData.get("isPreview") === "on";
@@ -162,7 +164,8 @@ export async function updateLesson(
 ): Promise<CreateCourseState> {
   const title = formData.get("title")?.toString()?.trim();
   const description = formData.get("description")?.toString()?.trim() || null;
-  const videoUrl = formData.get("videoUrl")?.toString()?.trim() || null;
+  const videoUrlRaw = formData.get("videoUrl")?.toString()?.trim() || null;
+  const videoUrl = normalizeVideoUrlForStorage(videoUrlRaw) ?? videoUrlRaw;
   const durationRaw = formData.get("duration")?.toString()?.trim();
   const orderRaw = formData.get("lessonOrder")?.toString()?.trim();
   const isPreview = formData.get("isPreview") === "on";

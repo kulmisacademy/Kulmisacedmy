@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 import { SignInForm } from "./SignInForm";
+import { getSession } from "@/lib/auth";
 
 export const metadata = {
   title: "Sign In – Kulmis Academy",
@@ -15,6 +17,11 @@ type Props = { searchParams: Promise<{ returnTo?: string }> };
 
 export default async function SignInPage({ searchParams }: Props) {
   const { returnTo } = await searchParams;
+  const session = await getSession();
+  if (session) {
+    const dest = session.role === "admin" ? "/admin/dashboard" : "/dashboard";
+    redirect(returnTo || dest);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

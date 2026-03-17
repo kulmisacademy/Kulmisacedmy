@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Props = {
   href: string;
@@ -9,28 +9,15 @@ type Props = {
   onClick?: () => void;
 };
 
+/**
+ * Link for lesson navigation. Uses Next.js Link so client-side navigation
+ * updates the URL; the lesson page uses useLesson(courseId, lessonId) which
+ * refetches when the key changes, so the correct lesson loads without refresh.
+ */
 export function LessonNavLink({ href, className, children, onClick }: Props) {
-  const router = useRouter();
-
-  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    router.push(href);
-    setTimeout(() => {
-      router.refresh();
-    }, 100);
-    setTimeout(() => {
-      // Fallback: if the App Router cache still causes stale data,
-      // force a full navigation for this critical flow.
-      if (window.location.pathname !== href) {
-        window.location.href = href;
-      }
-    }, 800);
-    onClick?.();
-  }
-
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <Link href={href} prefetch={false} className={className} onClick={onClick}>
       {children}
-    </a>
+    </Link>
   );
 }

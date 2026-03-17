@@ -3,7 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { register } from "./actions";
+import { queryKeys } from "@/lib/query-keys";
 
 export function RegisterForm({
   returnTo,
@@ -13,14 +15,17 @@ export function RegisterForm({
   returnToEncoded: string;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [state, formAction] = useFormState(register, null);
 
   useEffect(() => {
     if (state && "redirectTo" in state && state.redirectTo) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.session });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboardCourses });
       router.refresh();
       window.location.href = state.redirectTo;
     }
-  }, [state, router]);
+  }, [state, router, queryClient]);
 
   return (
     <form action={formAction} className="mt-6 space-y-4">

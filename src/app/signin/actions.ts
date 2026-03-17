@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
@@ -41,9 +42,10 @@ export async function signIn(
   await setSessionCookie(session);
   await updateUserSessionOnLogin(user.id);
 
-  const redirectTo = user.role === "admin" ? "/admin/dashboard" : returnTo;
+  const redirectTo =
+    user.role === "admin" ? "/admin/dashboard" : (returnTo || "/dashboard");
   revalidatePath(redirectTo);
   revalidatePath("/dashboard");
   revalidatePath("/");
-  return { success: true, redirectTo };
+  redirect(redirectTo);
 }

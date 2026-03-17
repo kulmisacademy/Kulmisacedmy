@@ -64,7 +64,7 @@ export default async function PaymentRequestsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     {r.status === "pending" && (
-                      <ApproveRejectButtons requestId={r.id} />
+                      <ApproveRejectButtons requestId={r.id} courseId={r.courseId} />
                     )}
                   </td>
                 </tr>

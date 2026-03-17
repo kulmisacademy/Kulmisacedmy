@@ -4,6 +4,7 @@ import { useFormState } from "react-dom";
 import Link from "next/link";
 import { updateLesson } from "../../../../actions";
 import type { Lesson } from "@/lib/schema";
+import { normalizeVideoUrlForStorage } from "@/lib/video";
 
 export function EditLessonForm({ lesson, courseId }: { lesson: Lesson; courseId: number }) {
   const [state, formAction] = useFormState(
@@ -44,11 +45,12 @@ export function EditLessonForm({ lesson, courseId }: { lesson: Lesson; courseId:
         <input
           id="videoUrl"
           name="videoUrl"
-          type="url"
-          defaultValue={lesson.videoUrl ?? ""}
+          type="text"
+          defaultValue={normalizeVideoUrlForStorage(lesson.videoUrl) ?? lesson.videoUrl ?? ""}
           className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          placeholder="https://vimeo.com/123456789 or https://youtube.com/watch?v=abc123"
+          placeholder="https://vimeo.com/123456789 or paste embed iframe"
         />
+        <p className="mt-1 text-xs text-gray-500">Paste a video URL or the full Vimeo/YouTube embed iframe; the video ID will be saved.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

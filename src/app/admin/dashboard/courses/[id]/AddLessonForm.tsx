@@ -41,11 +41,11 @@ export function AddLessonForm({ courseId }: { courseId: number }) {
         <input
           id="videoUrl"
           name="videoUrl"
-          type="url"
+          type="text"
           className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          placeholder="https://vimeo.com/123456789 or https://youtube.com/watch?v=abc123"
+          placeholder="https://vimeo.com/123456789 or paste embed iframe"
         />
-        <p className="mt-1 text-xs text-gray-500">Paste a Vimeo or YouTube video URL.</p>
+        <p className="mt-1 text-xs text-gray-500">Paste a video URL or the full Vimeo/YouTube embed iframe; the video ID will be saved.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

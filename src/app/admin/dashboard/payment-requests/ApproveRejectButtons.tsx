@@ -2,18 +2,39 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { approvePaymentRequest, rejectPaymentRequest } from "./actions";
+import { queryKeys } from "@/lib/query-keys";
 
-export function ApproveRejectButtons({ requestId }: { requestId: number }) {
+export function ApproveRejectButtons({
+  requestId,
+  courseId,
+}: {
+  requestId: number;
+  courseId: number;
+}) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [pending, setPending] = useState<"approve" | "reject" | null>(null);
+
+  const approveMutation = useMutation({
+    mutationFn: () => approvePaymentRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboardCourses });
+      queryClient.invalidateQueries({ queryKey: queryKeys.course(courseId) });
+      router.refresh();
+    },
+  });
+  const rejectMutation = useMutation({
+    mutationFn: () => rejectPaymentRequest(requestId),
+    onSuccess: () => router.refresh(),
+  });
 
   async function handleApprove() {
     if (pending) return;
     setPending("approve");
     try {
-      await approvePaymentRequest(requestId);
-      router.refresh();
+      await approveMutation.mutateAsync(undefined);
     } finally {
       setPending(null);
     }
@@ -24,8 +45,7 @@ export function ApproveRejectButtons({ requestId }: { requestId: number }) {
     if (!confirm("Reject this payment request?")) return;
     setPending("reject");
     try {
-      await rejectPaymentRequest(requestId);
-      router.refresh();
+      await rejectMutation.mutateAsync(undefined);
     } finally {
       setPending(null);
     }

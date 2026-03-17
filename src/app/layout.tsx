@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 import { NeonBackground } from "@/components/NeonBackground";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { WhatsAppChatButton } from "@/components/WhatsAppChatButton";
@@ -32,10 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth overflow-x-hidden">
       <body className="min-h-screen w-full overflow-x-hidden bg-white/80 text-gray-800 antialiased transition-colors duration-300">
-        <NeonBackground />
-        <div className="relative min-h-screen w-full min-w-0">{children}</div>
-        <PwaInstallPrompt />
-        <WhatsAppChatButton />
+        <Providers>
+          <NeonBackground />
+          <div className="relative min-h-screen w-full min-w-0">{children}</div>
+          <PwaInstallPrompt />
+          <WhatsAppChatButton />
+        </Providers>
       </body>
     </html>
   );

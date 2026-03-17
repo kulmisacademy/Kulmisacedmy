@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enrollFreeCourse, submitPaymentRequest } from "./actions";
 import { CONTACT_PHONE, WHATSAPP_URL } from "@/lib/constants";
+import { queryKeys } from "@/lib/query-keys";
 
 const PAYMENT_INSTRUCTIONS = `Please send the course payment using one of the following mobile payment methods.
 
@@ -36,25 +38,19 @@ export function EnrollSection({
   hasPendingPayment = false,
 }: Props) {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [enrollPending, setEnrollPending] = useState(false);
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isPaid = price != null && price > 0;
 
   const [paymentState, paymentFormAction] = useFormState(submitPaymentRequest, null);
 
-  useEffect(() => {
-    if (paymentState?.success) router.refresh();
-  }, [paymentState?.success, router]);
-
-  async function handleFreeEnroll() {
-    if (enrollPending) return;
-    setEnrollPending(true);
-    setEnrollError(null);
-    try {
-      const result = await enrollFreeCourse(courseId);
+  const enrollMutation = useMutation({
+    mutationFn: () => enrollFreeCourse(courseId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboardCourses });
+      queryClient.invalidateQueries({ queryKey: queryKeys.course(courseId) });
       if (result.ok) {
-        router.refresh();
         router.push(result.redirectTo);
         return;
       }
@@ -62,12 +58,23 @@ export function EnrollSection({
         window.location.href = result.redirectTo;
         return;
       }
-      setEnrollError("Failed to enroll. Please try again.");
-    } catch {
-      setEnrollError("Something went wrong. Please try again.");
-    } finally {
-      setEnrollPending(false);
+      setEnrollError("error" in result ? result.error : "Failed to enroll. Please try again.");
+    },
+    onError: () => setEnrollError("Something went wrong. Please try again."),
+  });
+
+  useEffect(() => {
+    if (paymentState?.success) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboardCourses });
+      queryClient.invalidateQueries({ queryKey: queryKeys.course(courseId) });
+      router.refresh();
     }
+  }, [paymentState?.success, queryClient, courseId, router]);
+
+  async function handleFreeEnroll() {
+    if (enrollMutation.isPending) return;
+    setEnrollError(null);
+    enrollMutation.mutate(undefined);
   }
 
   function handleEnrollClick() {
@@ -226,10 +233,10 @@ export function EnrollSection({
       <button
         type="button"
         onClick={handleFreeEnroll}
-        disabled={enrollPending}
+        disabled={enrollMutation.isPending}
         className="mt-4 w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white hover:bg-primary-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {enrollPending ? "Enrolling…" : "Enroll now (free)"}
+        {enrollMutation.isPending ? "Enrolling…" : "Enroll now (free)"}
       </button>
     </div>
   );

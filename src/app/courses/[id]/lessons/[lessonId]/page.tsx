@@ -11,6 +11,7 @@ import { checkOrCreateUserSession } from "@/lib/session-access";
 import { getVideoEmbed } from "@/lib/video";
 import { LessonPlayerTabs } from "./LessonPlayerTabs";
 import { LessonListSlide } from "./LessonListSlide";
+import { LessonNavLink } from "./LessonNavLink";
 import { LessonNotFoundMessage } from "./LessonNotFoundMessage";
 import { markLessonComplete } from "./actions";
 
@@ -260,9 +261,8 @@ export default async function LessonPlayerPage({
                 <ul className="mt-4 space-y-1 max-h-[60vh] overflow-y-auto">
                   {allLessons.map((lesson, index) => (
                     <li key={lesson.id}>
-                      <Link
+                      <LessonNavLink
                         href={`/courses/${courseId}/lessons/${lesson.id}`}
-                        prefetch={false}
                         className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm smooth-transition ${
                           lesson.id === currentLesson.id
                             ? "bg-primary-50 font-medium text-primary-700"
@@ -278,7 +278,7 @@ export default async function LessonPlayerPage({
                             {formatDuration(lesson.duration)}
                           </span>
                         )}
-                      </Link>
+                      </LessonNavLink>
                     </li>
                   ))}
                 </ul>
@@ -339,33 +339,34 @@ export default async function LessonPlayerPage({
 
               <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-3">
                 {prevLesson ? (
-                  <Link
+                  <LessonNavLink
                     href={`/courses/${courseId}/lessons/${prevLesson.id}`}
-                    prefetch={false}
                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-primary-200 smooth-transition btn-neon"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                     </svg>
                     Previous Lesson
-                  </Link>
+                  </LessonNavLink>
                 ) : null}
-                <Link
-                  href={nextLesson ? `/courses/${courseId}/lessons/${nextLesson.id}` : `/courses/${courseId}`}
-                  prefetch={nextLesson ? false : undefined}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 shadow-md smooth-transition btn-neon"
-                >
-                  {nextLesson ? (
-                    <>
-                      Next Lesson
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </>
-                  ) : (
-                    "Back to course"
-                  )}
-                </Link>
+                {nextLesson ? (
+                  <LessonNavLink
+                    href={`/courses/${courseId}/lessons/${nextLesson.id}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 shadow-md smooth-transition btn-neon"
+                  >
+                    Next Lesson
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </LessonNavLink>
+                ) : (
+                  <Link
+                    href={`/courses/${courseId}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 shadow-md smooth-transition btn-neon"
+                  >
+                    Back to course
+                  </Link>
+                )}
               </div>
 
               <LessonPlayerTabs overviewContent={currentLesson.description} resources={resources} />

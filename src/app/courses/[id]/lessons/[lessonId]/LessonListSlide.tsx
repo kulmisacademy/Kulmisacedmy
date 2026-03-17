@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { LessonNavLink } from "./LessonNavLink";
 
 function formatDuration(minutes: number | null): string {
   if (minutes == null) return "";
@@ -67,9 +67,8 @@ export function LessonListSlide({ lessons, courseId, currentLessonId, courseTitl
             <ul className="space-y-0.5">
               {lessons.map((lesson, index) => (
                 <li key={lesson.id}>
-                  <Link
+                  <LessonNavLink
                     href={`/courses/${courseId}/lessons/${lesson.id}`}
-                    prefetch={false}
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm smooth-transition ${
                       lesson.id === currentLessonId
@@ -86,7 +85,7 @@ export function LessonListSlide({ lessons, courseId, currentLessonId, courseTitl
                         {formatDuration(lesson.duration)}
                       </span>
                     )}
-                  </Link>
+                  </LessonNavLink>
                 </li>
               ))}
             </ul>

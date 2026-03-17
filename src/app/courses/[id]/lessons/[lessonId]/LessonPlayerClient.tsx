@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { CourseResource, LessonResource } from "@/lib/schema";
 import { useLesson, type LessonData } from "@/hooks/use-lesson";
+import { useSession } from "@/hooks/use-session";
 import { CourseResourcesBlock } from "../../CourseResourcesBlock";
 import { LessonPlayerTabs } from "./LessonPlayerTabs";
 import { LessonListSlide } from "./LessonListSlide";
@@ -22,6 +23,7 @@ export function LessonPlayerClient({ courseId, lessonId }: Props) {
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const invalidIds = isNaN(courseId) || isNaN(lessonId) || courseId <= 0 || lessonId <= 0;
+  const { data: session } = useSession();
   const { data, isLoading, isError } = useLesson(
     invalidIds ? null : courseId,
     invalidIds ? null : lessonId
@@ -308,7 +310,7 @@ export function LessonPlayerClient({ courseId, lessonId }: Props) {
                   </div>
                 )}
               </div>
-              {embedUrl?.includes("vimeo.com") && (
+              {session?.role === "admin" && embedUrl?.includes("vimeo.com") && (
                 <p className="mt-2 text-xs text-gray-500">
                   If you see &quot;Sign in to Vimeo&quot;, the video owner must allow embedding: Vimeo → Video → Settings → Privacy → &quot;Where can this be embedded?&quot; → add this site&apos;s domain.
                 </p>

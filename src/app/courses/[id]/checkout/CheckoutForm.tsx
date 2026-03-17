@@ -17,9 +17,9 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
     return (
       <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-6">
         <p className="font-medium text-green-800">
-          Your payment request has been sent successfully. Please contact us to confirm your enrollment.
+          Codsigaaga bixinta waa la diray. Fadlan nala soo xiriir si loo xaqiijiyo diiwaangelintaada.
         </p>
-        <p className="mt-4 text-sm font-medium text-gray-700">WhatsApp or Call: {CONTACT_PHONE}</p>
+        <p className="mt-4 text-sm font-medium text-gray-700">WhatsApp / Wac: {CONTACT_PHONE}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <a
             href={WHATSAPP_URL}
@@ -27,13 +27,13 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
           >
-            Contact on WhatsApp
+            WhatsApp
           </a>
           <a
             href={`tel:${CONTACT_PHONE}`}
             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Call Now
+            Wac
           </a>
         </div>
       </div>
@@ -47,7 +47,7 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>
       )}
       <div>
-        <label htmlFor="checkout-name" className="block text-sm font-medium text-gray-700">Full Name *</label>
+        <label htmlFor="checkout-name" className="block text-sm font-medium text-gray-700">Magaca Buuxa *</label>
         <input
           id="checkout-name"
           name="name"
@@ -58,7 +58,7 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
         />
       </div>
       <div>
-        <label htmlFor="checkout-phone" className="block text-sm font-medium text-gray-700">Phone Number *</label>
+        <label htmlFor="checkout-phone" className="block text-sm font-medium text-gray-700">Lambarka Taleefanka *</label>
         <input
           id="checkout-phone"
           name="phone"
@@ -68,7 +68,7 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
         />
       </div>
       <div>
-        <label htmlFor="checkout-course" className="block text-sm font-medium text-gray-700">Course Name</label>
+        <label htmlFor="checkout-course" className="block text-sm font-medium text-gray-700">Magaca Koorsada</label>
         <input
           id="checkout-course"
           name="courseName"
@@ -82,7 +82,7 @@ export function CheckoutForm({ courseId, courseTitle, userName }: Props) {
         type="submit"
         className="w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-primary-700"
       >
-        Submit Payment Request
+        Dir Codsiga Bixinta
       </button>
     </form>
   );

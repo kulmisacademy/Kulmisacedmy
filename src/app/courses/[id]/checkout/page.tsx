@@ -105,18 +105,18 @@ export default async function CheckoutPage({
             </section>
 
             <section className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm smooth-transition order-1 lg:order-2">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900">Payment Method</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900">Habka Bixinta Lacagta</h2>
               <div className="mt-4 rounded-xl bg-gray-50 p-3 sm:p-4 text-sm text-gray-700">
-                <p className="font-medium text-gray-900">Somali mobile payment</p>
+                <p className="font-medium text-gray-900">Lacag bixinta mobilka (Somali Mobile Payment)</p>
                 <p className="mt-2">
-                  Please send the course payment using one of the following mobile payment methods.
+                  Fadlan si aad u hesho koorsadan, ku dir lacagta mid ka mid ah number-rada hoose:
                 </p>
                 <ul className="mt-3 space-y-1">
                   <li><strong>EVC PLUS:</strong> +252613609678</li>
-                  <li><strong>DAHABSHIIL:</strong> 623609678</li>
+                  <li><strong>E-DAHAB:</strong> 623609678</li>
                 </ul>
                 <p className="mt-3">
-                  After sending the payment, fill in the form below and submit your request.
+                  Marka aad dirto lacagta, fadlan la xiriir number-ka hoose si loo xaqiijiyo bixintaada. Kadib buuxi foomkan hoose oo dir codsigaaga.
                 </p>
               </div>
               <CheckoutForm courseId={courseId} courseTitle={course.title} userName={session.name} />

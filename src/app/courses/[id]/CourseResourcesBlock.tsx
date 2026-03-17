@@ -15,6 +15,11 @@ function getExtension(fileUrl: string): string {
   return match ? match[1].toLowerCase() : "";
 }
 
+function isExternalLink(fileUrl: string): boolean {
+  const u = fileUrl.trim();
+  return u.startsWith("http://") || u.startsWith("https://");
+}
+
 export function CourseResourcesBlock({ resources }: { resources: CourseResource[] }) {
   if (resources.length === 0) return null;
 
@@ -24,11 +29,12 @@ export function CourseResourcesBlock({ resources }: { resources: CourseResource[
         Course Resources
       </h2>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Downloadable files for this course.
+        Downloadable files and links for this course.
       </p>
       <ul className="mt-4 grid gap-3 sm:grid-cols-2">
         {resources.map((res) => {
           const ext = getExtension(res.fileUrl);
+          const isLink = isExternalLink(res.fileUrl);
           return (
             <li
               key={res.id}
@@ -36,7 +42,7 @@ export function CourseResourcesBlock({ resources }: { resources: CourseResource[
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span className="text-2xl" aria-hidden>
-                  {getFileIcon(ext)}
+                  {isLink ? "🔗" : getFileIcon(ext)}
                 </span>
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 dark:text-white truncate">
@@ -52,9 +58,9 @@ export function CourseResourcesBlock({ resources }: { resources: CourseResource[
               <a
                 href={`/api/course-resources/${res.id}/download`}
                 className="shrink-0 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
-                download
+                {...(isLink ? { target: "_blank", rel: "noopener noreferrer" } : { download: true })}
               >
-                Download
+                {isLink ? "Open link" : "Download"}
               </a>
             </li>
           );

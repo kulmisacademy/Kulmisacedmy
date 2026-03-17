@@ -22,6 +22,11 @@ function getExtension(fileUrl: string): string {
   return match ? match[1].toLowerCase() : "";
 }
 
+function isExternalLink(fileUrl: string): boolean {
+  const u = (fileUrl || "").trim();
+  return u.startsWith("http://") || u.startsWith("https://");
+}
+
 export function CourseResourcesSection({
   courseId,
   resources,
@@ -40,8 +45,8 @@ export function CourseResourcesSection({
         Course Resources
       </h2>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Upload downloadable files (ZIP, PDF, DOCX, XLSX, PPTX, TXT). Max 100MB per file.
-        Only enrolled students can download these.
+        Add a file upload or a link. Files: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max 100MB per file.
+        Only enrolled students can access these.
       </p>
 
       <form
@@ -73,19 +78,39 @@ export function CourseResourcesSection({
         </div>
         <div>
           <label
+            htmlFor="resourceUrl"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            Resource URL (if link)
+          </label>
+          <input
+            id="resourceUrl"
+            name="resourceUrl"
+            type="url"
+            placeholder="https://..."
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+          />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Leave empty if you are uploading a file.
+          </p>
+        </div>
+        <div>
+          <label
             htmlFor="resourceFile"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            File Upload *
+            File Upload (if not using a link)
           </label>
           <input
             id="resourceFile"
             name="resourceFile"
             type="file"
-            required
             accept={ALLOWED_ACCEPT}
             className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 dark:text-gray-400 dark:file:bg-primary-900/30 dark:file:text-primary-300"
           />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Provide either a URL above or a file here.
+          </p>
         </div>
         <div>
           <label
@@ -114,6 +139,7 @@ export function CourseResourcesSection({
         <ul className="mt-4 space-y-2">
           {resources.map((res) => {
             const ext = getExtension(res.fileUrl);
+            const isLink = isExternalLink(res.fileUrl);
             return (
               <li
                 key={res.id}
@@ -121,7 +147,7 @@ export function CourseResourcesSection({
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-xl" aria-hidden>
-                    {getFileIcon(ext)}
+                    {isLink ? "🔗" : getFileIcon(ext)}
                   </span>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-white truncate">

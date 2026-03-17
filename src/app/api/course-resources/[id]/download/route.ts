@@ -50,8 +50,14 @@ export async function GET(
     );
   }
 
+  const url = resource.fileUrl.trim();
+  // External link: redirect so enrolled user can open it
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return NextResponse.redirect(url, 302);
+  }
+
   // fileUrl is e.g. /uploads/course-resources/res-123.zip
-  const filePath = path.join(process.cwd(), "public", resource.fileUrl);
+  const filePath = path.join(process.cwd(), "public", url);
   if (!existsSync(filePath)) {
     return NextResponse.json(
       { error: "File not found on server." },
@@ -59,7 +65,7 @@ export async function GET(
     );
   }
 
-  const ext = path.extname(resource.fileUrl).slice(1) || "bin";
+  const ext = path.extname(url).slice(1) || "bin";
   const safeTitle = resource.title.replace(/[^a-zA-Z0-9._-]/g, "_");
   const filename = `${safeTitle}.${ext}`;
 

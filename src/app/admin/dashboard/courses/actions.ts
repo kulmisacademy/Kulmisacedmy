@@ -271,6 +271,15 @@ export async function deleteLessonResource(resourceId: number, lessonId: number,
 
 export type AddCourseResourceState = { error?: string } | null;
 
+function isHttpUrl(s: string): boolean {
+  try {
+    const u = new URL(s);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export async function addCourseResource(
   courseId: number,
   _prevState: AddCourseResourceState,
@@ -278,18 +287,24 @@ export async function addCourseResource(
 ): Promise<AddCourseResourceState> {
   const title = formData.get("resourceTitle")?.toString()?.trim();
   const description = formData.get("resourceDescription")?.toString()?.trim() || null;
+  const resourceUrl = formData.get("resourceUrl")?.toString()?.trim() || "";
   const file = formData.get("resourceFile") instanceof File ? (formData.get("resourceFile") as File) : null;
 
   if (!title) return { error: "Resource title is required." };
-  if (!file || file.size === 0) return { error: "Please select a file to upload." };
 
-  let fileUrl = await saveCourseResourceLocal(file);
-  if (!fileUrl) fileUrl = await uploadCourseResource(file);
-  if (!fileUrl) {
-    return {
-      error:
-        "File upload failed. Allowed: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max 100MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy.",
-    };
+  let fileUrl: string;
+  if (resourceUrl && isHttpUrl(resourceUrl)) {
+    fileUrl = resourceUrl;
+  } else if (file && file.size > 0) {
+    fileUrl = (await saveCourseResourceLocal(file)) ?? (await uploadCourseResource(file)) ?? "";
+    if (!fileUrl) {
+      return {
+        error:
+          "File upload failed. Allowed: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max 100MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy.",
+      };
+    }
+  } else {
+    return { error: "Provide either a resource URL (link) or upload a file." };
   }
 
   try {
@@ -299,6 +314,9 @@ export async function addCourseResource(
       fileUrl,
       description,
     });
+    revalidatePath(`/admin/dashboard/courses/${courseId}/edit`);
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath(`/courses/${courseId}/lessons/[lessonId]`);
   } catch (err) {
     console.error(err);
     return { error: "Failed to add resource." };

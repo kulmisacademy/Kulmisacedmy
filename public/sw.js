@@ -4,7 +4,7 @@
  * - Falls back to network when online
  */
 
-const CACHE_NAME = "kulmis-academy-v1";
+const CACHE_NAME = "kulmis-academy-v2";
 
 // Precache these if they exist. If any fail (e.g. 404), install still succeeds.
 const PRECACHE_URLS = ["/", "/manifest.webmanifest"];

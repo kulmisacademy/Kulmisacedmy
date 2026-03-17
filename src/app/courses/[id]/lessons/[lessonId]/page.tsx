@@ -11,6 +11,7 @@ import { checkOrCreateUserSession } from "@/lib/session-access";
 import { getVideoEmbed } from "@/lib/video";
 import { LessonPlayerTabs } from "./LessonPlayerTabs";
 import { LessonListSlide } from "./LessonListSlide";
+import { LessonNotFoundMessage } from "./LessonNotFoundMessage";
 import { markLessonComplete } from "./actions";
 
 export const metadata = {
@@ -19,43 +20,6 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-function LessonNotFoundMessage({ courseId, isCourseMissing }: { courseId?: number; isCourseMissing?: boolean }) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <HeaderWithSession />
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-md rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-900/20">
-          <h1 className="text-xl font-bold text-amber-800 dark:text-amber-200">
-            {isCourseMissing ? "Course not found" : "Lesson not found"}
-          </h1>
-          <p className="mt-3 text-amber-700 dark:text-amber-300">
-            {isCourseMissing
-              ? "This course may have been removed or the link is incorrect."
-              : "This lesson may have been removed or the link is incorrect. Try opening the course and choosing a lesson from the list."}
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {courseId && (
-              <Link
-                href={`/courses/${courseId}`}
-                className="inline-block rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600"
-              >
-                Back to course
-              </Link>
-            )}
-            <Link
-              href="/courses"
-              className="inline-block rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:bg-gray-800 dark:text-amber-200 dark:hover:bg-amber-900/30"
-            >
-              Browse courses
-            </Link>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
 
 function formatDuration(minutes: number | null): string {
   if (minutes == null) return "";
@@ -274,6 +238,7 @@ export default async function LessonPlayerPage({
                     <li key={lesson.id}>
                       <Link
                         href={`/courses/${courseId}/lessons/${lesson.id}`}
+                        prefetch={false}
                         className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm smooth-transition ${
                           lesson.id === currentLesson.id
                             ? "bg-primary-50 font-medium text-primary-700"
@@ -352,6 +317,7 @@ export default async function LessonPlayerPage({
                 {prevLesson ? (
                   <Link
                     href={`/courses/${courseId}/lessons/${prevLesson.id}`}
+                    prefetch={false}
                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-primary-200 smooth-transition btn-neon"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,6 +328,7 @@ export default async function LessonPlayerPage({
                 ) : null}
                 <Link
                   href={nextLesson ? `/courses/${courseId}/lessons/${nextLesson.id}` : `/courses/${courseId}`}
+                  prefetch={nextLesson ? false : undefined}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 shadow-md smooth-transition btn-neon"
                 >
                   {nextLesson ? (

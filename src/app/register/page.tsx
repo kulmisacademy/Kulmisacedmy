@@ -8,6 +8,8 @@ export const metadata = {
   description: "Create your student account.",
 };
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ returnTo?: string }> };
 
 export default async function RegisterPage({ searchParams }: Props) {

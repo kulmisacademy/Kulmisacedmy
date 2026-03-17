@@ -2,6 +2,8 @@ import Link from "next/link";
 import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 
+export const dynamic = "force-dynamic";
+
 export default function BlockedPage() {
   return (
     <div className="min-h-screen flex flex-col">

@@ -74,6 +74,7 @@ export default async function MyCoursesPage() {
           </div>
           <Link
             href={resumeUrl}
+            prefetch={false}
             className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-5 py-3 text-sm font-medium text-white hover:bg-primary-400 btn-neon"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -127,6 +128,7 @@ export default async function MyCoursesPage() {
                   <p className="mt-1.5 text-xs text-gray-500">0% complete</p>
                   <Link
                     href={continueUrl}
+                    prefetch={false}
                     className="mt-4 inline-flex justify-center items-center rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-600 btn-neon w-full sm:w-auto"
                   >
                     Continue Learning

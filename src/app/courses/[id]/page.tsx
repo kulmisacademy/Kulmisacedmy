@@ -175,6 +175,7 @@ export default async function CourseDetailPage({
                       {canAccess ? (
                         <Link
                           href={`/courses/${courseId}/lessons/${lesson.id}`}
+                          prefetch={false}
                           className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md hover:border-primary-200"
                         >
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600 font-semibold text-sm">

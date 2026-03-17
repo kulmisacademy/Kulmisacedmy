@@ -1,10 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormState } from "react-dom";
 import { login } from "./actions";
 
 export function AdminLoginForm() {
-  const [state, formAction] = useFormState(login, null as { error?: string } | null);
+  const [state, formAction] = useFormState(login, null as { error?: string } | { success?: true; redirectTo?: string } | null);
+
+  useEffect(() => {
+    if (state && "success" in state && state.success && state.redirectTo) {
+      window.location.href = state.redirectTo;
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="mt-6 space-y-4">
@@ -35,8 +42,11 @@ export function AdminLoginForm() {
           className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
         />
       </div>
-      {state?.error && (
+      {state && "error" in state && state.error && (
         <p className="text-sm text-red-600">{state.error}</p>
+      )}
+      {"success" in (state || {}) && state?.success && (
+        <p className="text-sm text-green-600">Redirecting…</p>
       )}
       <button
         type="submit"

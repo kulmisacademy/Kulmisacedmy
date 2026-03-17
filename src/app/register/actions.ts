@@ -1,13 +1,13 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { createSession, setSessionCookie } from "@/lib/auth";
 
-export type RegisterState = { error?: string } | null;
+export type RegisterState = { error?: string } | { success: true; redirectTo: string } | null;
 
 export async function register(
   _prevState: RegisterState,
@@ -59,5 +59,8 @@ export async function register(
     role: user.role,
   });
   await setSessionCookie(session);
-  redirect(returnTo);
+  revalidatePath("/dashboard");
+  revalidatePath(returnTo);
+  revalidatePath("/");
+  return { success: true, redirectTo: returnTo };
 }

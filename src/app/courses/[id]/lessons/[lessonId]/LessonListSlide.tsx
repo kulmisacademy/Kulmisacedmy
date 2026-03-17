@@ -69,6 +69,7 @@ export function LessonListSlide({ lessons, courseId, currentLessonId, courseTitl
                 <li key={lesson.id}>
                   <Link
                     href={`/courses/${courseId}/lessons/${lesson.id}`}
+                    prefetch={false}
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm smooth-transition ${
                       lesson.id === currentLessonId

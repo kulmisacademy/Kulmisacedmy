@@ -3,6 +3,8 @@ import { getAdminSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardLayout({
   children,
 }: {

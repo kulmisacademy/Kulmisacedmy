@@ -8,6 +8,8 @@ export const metadata = {
   description: "Sign in to your Kulmis Academy account.",
 };
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ returnTo?: string }> };
 
 export default async function SignInPage({ searchParams }: Props) {

@@ -3,6 +3,8 @@ import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 import { SupportForm } from "./SupportForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function SupportPage() {
   const session = await getSession();
 

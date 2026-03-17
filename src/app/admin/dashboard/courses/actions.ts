@@ -149,6 +149,8 @@ await db.insert(lessons).values({
     console.error(err);
     return { error: "Failed to add lesson. Please try again." };
   }
+  revalidatePath(`/admin/dashboard/courses/${courseId}`);
+  revalidatePath(`/courses/${courseId}`);
   redirect(`/admin/dashboard/courses/${courseId}`);
 }
 
@@ -193,6 +195,8 @@ export async function updateLesson(
     console.error(err);
     return { error: "Failed to update lesson. Please try again." };
   }
+  revalidatePath(`/admin/dashboard/courses/${courseId}`);
+  revalidatePath(`/courses/${courseId}`);
   redirect(`/admin/dashboard/courses/${courseId}`);
 }
 
@@ -210,11 +214,15 @@ export async function updateLessonOrder(lessonId: number, newOrder: number) {
   for (let i = 0; i < reordered.length; i++) {
     await db.update(lessons).set({ lessonOrder: i }).where(eq(lessons.id, reordered[i].id));
   }
+  revalidatePath(`/admin/dashboard/courses/${lesson.courseId}`);
+  revalidatePath(`/courses/${lesson.courseId}`);
   redirect(`/admin/dashboard/courses/${lesson.courseId}`);
 }
 
 export async function deleteLesson(lessonId: number, courseId: number) {
   await db.delete(lessons).where(eq(lessons.id, lessonId));
+  revalidatePath(`/admin/dashboard/courses/${courseId}`);
+  revalidatePath(`/courses/${courseId}`);
   redirect(`/admin/dashboard/courses/${courseId}`);
 }
 

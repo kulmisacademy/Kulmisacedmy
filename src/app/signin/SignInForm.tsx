@@ -1,16 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormState } from "react-dom";
 import { signIn } from "./actions";
 
 export function SignInForm({ returnTo = "" }: { returnTo?: string }) {
   const [state, formAction] = useFormState(signIn, null);
 
+  useEffect(() => {
+    if (state && "success" in state && state.success && state.redirectTo) {
+      window.location.href = state.redirectTo;
+    }
+  }, [state]);
+
   return (
     <form action={formAction} className="mt-6 space-y-4">
       <input type="hidden" name="returnTo" value={returnTo} />
-      {state?.error && (
+      {state && "error" in state && state.error && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>
+      )}
+      {"success" in (state || {}) && state?.success && (
+        <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">Redirecting…</p>
       )}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>

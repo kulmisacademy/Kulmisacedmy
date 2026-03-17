@@ -48,9 +48,25 @@ self.addEventListener("fetch", (event) => {
   // Only handle GET requests.
   if (request.method !== "GET") return;
 
+  // Never run the PWA cache logic on localhost/dev. It causes confusing "Offline"
+  // responses during hot reloads and dev server restarts.
+  try {
+    const host = self.location && self.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") return;
+  } catch (_) {
+    // ignore
+  }
+
   // Avoid interfering with Next.js dev hot-reload and APIs.
   const url = new URL(request.url);
   if (url.pathname.startsWith("/_next/") || url.pathname.startsWith("/api/")) {
+    return;
+  }
+
+  // Do not intercept navigations / HTML documents (e.g. /dashboard). Let Next.js
+  // handle them to avoid serving a 503 Offline page.
+  const accept = request.headers.get("accept") || "";
+  if (request.mode === "navigate" || request.destination === "document" || accept.includes("text/html")) {
     return;
   }
 

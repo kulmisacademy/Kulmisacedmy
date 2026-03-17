@@ -8,7 +8,7 @@ export function AdminLoginForm() {
   const [state, formAction] = useFormState(login, null as { error?: string } | { success?: true; redirectTo?: string } | null);
 
   useEffect(() => {
-    if (state && "success" in state && state.success && state.redirectTo) {
+    if (state && "redirectTo" in state && state.redirectTo) {
       window.location.href = state.redirectTo;
     }
   }, [state]);
@@ -45,7 +45,7 @@ export function AdminLoginForm() {
       {state && "error" in state && state.error && (
         <p className="text-sm text-red-600">{state.error}</p>
       )}
-      {"success" in (state || {}) && state?.success && (
+      {state && "redirectTo" in state && state.redirectTo && (
         <p className="text-sm text-green-600">Redirecting…</p>
       )}
       <button

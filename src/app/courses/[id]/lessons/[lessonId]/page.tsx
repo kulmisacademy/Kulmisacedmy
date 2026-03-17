@@ -36,12 +36,28 @@ export default async function LessonPlayerPage({
   const courseId = parseInt(id, 10);
   const lessonIdNum = parseInt(lessonId, 10);
   if (isNaN(courseId) || isNaN(lessonIdNum)) {
-    return <LessonNotFoundMessage />;
+    return (
+      <div className="min-h-screen flex flex-col">
+        <HeaderWithSession />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <LessonNotFoundMessage />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   const [course] = await db.select().from(courses).where(eq(courses.id, courseId)).limit(1);
   if (!course) {
-    return <LessonNotFoundMessage isCourseMissing />;
+    return (
+      <div className="min-h-screen flex flex-col">
+        <HeaderWithSession />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <LessonNotFoundMessage isCourseMissing />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   const allLessons = await db
@@ -53,7 +69,15 @@ export default async function LessonPlayerPage({
   const currentIndex = allLessons.findIndex((l) => l.id === lessonIdNum);
   const currentLesson = currentIndex >= 0 ? allLessons[currentIndex] : null;
   if (!currentLesson) {
-    return <LessonNotFoundMessage courseId={courseId} />;
+    return (
+      <div className="min-h-screen flex flex-col">
+        <HeaderWithSession />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <LessonNotFoundMessage courseId={courseId} />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   const session = await getSession();

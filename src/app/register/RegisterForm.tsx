@@ -14,7 +14,7 @@ export function RegisterForm({
   const [state, formAction] = useFormState(register, null);
 
   useEffect(() => {
-    if (state && "success" in state && state.success && state.redirectTo) {
+    if (state && "redirectTo" in state && state.redirectTo) {
       window.location.href = state.redirectTo;
     }
   }, [state]);
@@ -25,7 +25,7 @@ export function RegisterForm({
       {state && "error" in state && state.error && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>
       )}
-      {"success" in (state || {}) && state?.success && (
+      {state && "redirectTo" in state && state.redirectTo && (
         <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">Redirecting…</p>
       )}
       <div>

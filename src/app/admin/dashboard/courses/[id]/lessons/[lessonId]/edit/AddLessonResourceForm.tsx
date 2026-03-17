@@ -1,21 +1,29 @@
 "use client";
 
-import { useFormState } from "react-dom";
-import { addLessonResource } from "../../../../actions";
+const RESOURCE_ERROR_MESSAGES: Record<string, string> = {
+  resource_title: "Resource title is required.",
+  resource_type: "Select file upload or link.",
+  resource_upload:
+    "File upload failed. Use allowed types (PDF, ZIP, images, text, etc.) and max 10MB. On Vercel ensure BLOB_READ_WRITE_TOKEN is set and redeploy. Keep files under 4.5 MB for reliability.",
+  resource_missing: "Provide a file upload or resource URL.",
+  resource_save: "Failed to save resource. Please try again.",
+};
 
-type Props = { lessonId: number; courseId: number };
+type Props = { lessonId: number; courseId: number; errorParam?: string };
 
-export function AddLessonResourceForm({ lessonId, courseId }: Props) {
-  const [state, formAction] = useFormState(
-    addLessonResource.bind(null, lessonId, courseId),
-    null as { error?: string } | null
-  );
+export function AddLessonResourceForm({ lessonId, courseId, errorParam }: Props) {
+  const errorMessage = errorParam ? (RESOURCE_ERROR_MESSAGES[errorParam] ?? "Something went wrong.") : null;
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="mt-4 space-y-4 rounded-lg border border-gray-200 bg-white p-4">
+    <form
+      action={`/api/admin/courses/${courseId}/lessons/${lessonId}/resource`}
+      method="POST"
+      encType="multipart/form-data"
+      className="mt-4 space-y-4 rounded-lg border border-gray-200 bg-white p-4"
+    >
       <h3 className="font-medium text-gray-900">Add resource</h3>
-      {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+      {errorMessage && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">{errorMessage}</p>
       )}
       <div>
         <label htmlFor="resourceTitle" className="block text-sm font-medium text-gray-700">Resource Title *</label>
@@ -49,7 +57,7 @@ export function AddLessonResourceForm({ lessonId, courseId }: Props) {
           type="file"
           className="mt-1 block w-full text-sm text-gray-600 file:rounded-lg file:border-0 file:bg-primary-100 file:px-4 file:py-2 file:text-primary-700"
         />
-        <p className="mt-1 text-xs text-gray-500">Max 10 MB. PDF, ZIP, text, images.</p>
+        <p className="mt-1 text-xs text-gray-500">Max 10 MB (under 4.5 MB recommended on Vercel). PDF, ZIP, text, images.</p>
       </div>
       <div>
         <label htmlFor="resourceUrl" className="block text-sm font-medium text-gray-700">Resource URL (if link)</label>

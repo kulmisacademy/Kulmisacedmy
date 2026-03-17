@@ -11,10 +11,13 @@ export const dynamic = "force-dynamic";
 
 export default async function EditLessonPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string; lessonId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id, lessonId } = await params;
+  const { error: resourceError } = await searchParams;
   const courseId = parseInt(id, 10);
   const lessonIdNum = parseInt(lessonId, 10);
   if (isNaN(courseId) || isNaN(lessonIdNum)) notFound();
@@ -46,7 +49,7 @@ export default async function EditLessonPage({
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-gray-900">Lesson resources</h2>
         <p className="mt-1 text-sm text-gray-500">PDFs, links, project files students can access below the video.</p>
-        <AddLessonResourceForm lessonId={lessonIdNum} courseId={courseId} />
+        <AddLessonResourceForm lessonId={lessonIdNum} courseId={courseId} errorParam={resourceError} />
         {resources.length > 0 && (
           <ul className="mt-4 space-y-2">
             {resources.map((r) => (

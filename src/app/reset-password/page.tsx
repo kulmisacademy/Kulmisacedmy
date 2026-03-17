@@ -9,6 +9,8 @@ export const metadata = {
   description: "Create a new password.",
 };
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ token?: string; success?: string; error?: string }> };
 
 export default async function ResetPasswordPage({ searchParams }: Props) {

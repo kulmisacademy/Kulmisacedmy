@@ -8,6 +8,8 @@ export const metadata = {
   description: "Enter your code and new password.",
 };
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ email?: string }> };
 
 export default async function VerifyResetPage({ searchParams }: Props) {

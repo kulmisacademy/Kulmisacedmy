@@ -8,6 +8,8 @@ export const metadata = {
   description: "Create your free account and start learning future skills.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function JoinPage() {
   return (
     <div className="min-h-screen flex flex-col">

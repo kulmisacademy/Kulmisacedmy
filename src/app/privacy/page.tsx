@@ -7,6 +7,8 @@ export const metadata = {
   description: "Privacy policy for Kulmis Academy e-learning platform.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">

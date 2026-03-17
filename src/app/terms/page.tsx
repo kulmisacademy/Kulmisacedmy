@@ -7,6 +7,8 @@ export const metadata = {
   description: "Terms of service for Kulmis Academy e-learning platform.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col">

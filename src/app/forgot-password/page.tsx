@@ -8,6 +8,8 @@ export const metadata = {
   description: "Request a password reset link.",
 };
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ sent?: string; error?: string }> };
 
 export default async function ForgotPasswordPage({ searchParams }: Props) {

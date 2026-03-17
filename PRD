@@ -1,0 +1,300 @@
+# Product Requirements Document (PRD)
+
+## Product Name
+
+Kulmis Academy
+
+## Product Overview
+
+Kulmis Academy is a modern e-learning platform designed to deliver high-quality online courses with a clean and engaging learning experience. The platform allows instructors (admins) to upload structured courses and lessons, while students can enroll in courses and watch lessons hosted on Vimeo.
+
+The goal of the platform is to create a simple but powerful course-learning environment similar to Udemy or Coursera, where students can easily browse courses, enroll, and track their learning progress.
+
+The system will be built using Next.js, Tailwind CSS, Neon PostgreSQL database, and Vimeo for secure video hosting.
+
+---
+
+# Technology Stack
+
+Frontend Framework
+Next.js (App Router)
+
+Styling
+Tailwind CSS
+
+Database
+Neon (Serverless PostgreSQL)
+
+Video Hosting
+Vimeo
+
+Authentication
+NextAuth or JWT authentication
+
+Deployment
+Vercel
+
+---
+
+# User Roles
+
+## Admin
+
+Admin users manage the platform.
+
+Permissions:
+
+* Create courses
+* Add lessons
+* Edit or delete courses
+* Upload Vimeo video links
+* Manage students
+* View analytics
+
+## Student
+
+Students use the platform to learn.
+
+Permissions:
+
+* Register account
+* Login
+* Browse courses
+* Enroll in courses
+* Watch lessons
+* Track course progress
+
+---
+
+# Core Features
+
+## 1. Homepage
+
+The homepage introduces the platform and displays available courses.
+
+Sections:
+
+* Hero section
+* Featured courses
+* Course categories
+* Call to action
+* Footer
+
+---
+
+## 2. Courses Page
+
+Displays all courses available on the platform.
+
+Each course card should include:
+
+* Course thumbnail
+* Course title
+* Short description
+* Number of lessons
+* Instructor name
+* Enroll button
+
+---
+
+## 3. Course Details Page
+
+Course details should include:
+
+* Course title
+* Instructor
+* Description
+* Course thumbnail
+* Total lessons
+* Course curriculum (lesson list)
+* Enroll button
+
+---
+
+## 4. Student Dashboard
+
+Students should have a personal dashboard where they can manage their learning.
+
+Features:
+
+* My Courses
+* Continue Learning
+* Progress tracking
+* Completed lessons
+
+---
+
+## 5. Lesson Player Page
+
+This is the main learning interface.
+
+Layout:
+
+Left Sidebar:
+
+* Lesson list
+* Course structure
+
+Main Content:
+
+* Vimeo video player
+* Lesson title
+* Lesson description
+* Next lesson button
+
+The video player must use Vimeo embedded player.
+
+Example embed:
+
+https://player.vimeo.com/video/{video_id}
+
+Students should only see the clean video player without Vimeo branding or external links.
+
+---
+
+## 6. Admin Dashboard
+
+Admin dashboard allows course management.
+
+Features:
+
+Create Course
+Fields:
+
+* Title
+* Description
+* Price
+* Thumbnail
+
+Add Lessons
+Fields:
+
+* Lesson title
+* Description
+* Vimeo video URL
+* Lesson order
+* Duration
+
+Admin can:
+
+* Edit lessons
+* Delete lessons
+* Manage course structure
+
+---
+
+# Database Schema
+
+Users Table
+id
+name
+email
+password
+role
+created_at
+
+Courses Table
+id
+title
+description
+thumbnail
+price
+created_at
+
+Lessons Table
+id
+course_id
+title
+description
+video_url
+lesson_order
+duration
+
+Enrollments Table
+id
+user_id
+course_id
+enrolled_at
+
+Progress Table
+id
+user_id
+lesson_id
+completed
+
+---
+
+# UI Design Requirements
+
+The platform must have a modern UI similar to Udemy or Coursera.
+
+Design principles:
+
+* Clean layout
+* Responsive design
+* Mobile friendly
+* Smooth animations
+* Minimalistic interface
+
+Use Tailwind CSS components and reusable UI patterns.
+
+---
+
+# Video Player Experience
+
+The lesson player should provide a distraction-free experience.
+
+Requirements:
+
+* Vimeo embedded player
+* No download links
+* Autoplay next lesson option
+* Progress saved automatically
+
+---
+
+# Security Requirements
+
+* Protect lesson pages for enrolled students only
+* Secure authentication
+* Prevent unauthorized access to course videos
+* Hide Vimeo source links from users
+
+---
+
+# Performance Requirements
+
+* Fast loading pages
+* Optimized images
+* Server-side rendering using Next.js
+* Efficient database queries
+
+---
+
+# Future Features
+
+The platform architecture should allow future additions such as:
+
+* Quiz system
+* Certificates
+* Student notes
+* Comments
+* AI learning assistant
+* Subscription payments
+
+---
+
+# Development Instructions
+
+Generate a full-stack application with the following:
+
+* Next.js App Router structure
+* Tailwind CSS styling
+* Neon PostgreSQL database integration
+* Authentication system
+* Admin dashboard
+* Student dashboard
+* Course and lesson management
+* Vimeo video player integration
+
+Ensure clean code structure, reusable components, and scalable architecture.

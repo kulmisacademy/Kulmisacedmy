@@ -5,6 +5,7 @@ import { reviews, users, courses } from "@/lib/schema";
 import { ApproveRejectDeleteButtons } from "./ApproveRejectDeleteButtons";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminReviewsPage() {
   const allReviews = await db

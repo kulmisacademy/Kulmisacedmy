@@ -15,6 +15,7 @@ export function UserSearchForm({ initialQuery }: { initialQuery: string }) {
     if (q) params.set("q", q);
     else params.delete("q");
     router.push(`/admin/dashboard/users?${params.toString()}`);
+    router.refresh();
   }
 
   return (

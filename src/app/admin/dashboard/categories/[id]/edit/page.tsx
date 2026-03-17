@@ -6,6 +6,7 @@ import { categories } from "@/lib/schema";
 import { EditCategoryForm } from "./EditCategoryForm";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function EditCategoryPage({
   params,

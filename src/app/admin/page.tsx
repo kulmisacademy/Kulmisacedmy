@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AdminLoginForm } from "./AdminLoginForm";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function AdminPage() {
   return (

@@ -8,6 +8,7 @@ import CTABanner from "@/components/CTABanner";
 import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function Home() {
   return (

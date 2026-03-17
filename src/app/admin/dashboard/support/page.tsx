@@ -4,6 +4,7 @@ import { supportMessages } from "@/lib/schema";
 import { SupportReplyForm } from "./SupportReplyForm";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminSupportPage() {
   const messages = await db.select().from(supportMessages).orderBy(desc(supportMessages.createdAt));

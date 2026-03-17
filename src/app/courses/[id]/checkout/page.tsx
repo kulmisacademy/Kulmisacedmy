@@ -13,6 +13,7 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function formatPrice(price: number | null): string {
   if (price == null || price === 0) return "Free";

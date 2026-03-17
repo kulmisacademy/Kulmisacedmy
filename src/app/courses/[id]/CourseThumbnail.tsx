@@ -10,12 +10,13 @@ type Props = { src?: string | null; title: string; subtitle?: string | null };
  */
 export function CourseThumbnail({ src, title }: Props) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [cacheBust] = useState(() => Date.now());
   const showImage = src && src.trim() !== "" && !imageFailed;
 
   if (showImage) {
     const cacheBustedSrc =
       src && (src.startsWith("http") || src.startsWith("/"))
-        ? `${src}${src.includes("?") ? "&" : "?"}v=${encodeURIComponent(src)}`
+        ? `${src}${src.includes("?") ? "&" : "?"}t=${cacheBust}`
         : src;
     return (
       <div className="relative aspect-video w-full min-h-[140px] overflow-hidden rounded-t-xl bg-gray-100">

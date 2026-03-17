@@ -4,6 +4,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminDashboardLayout({
   children,

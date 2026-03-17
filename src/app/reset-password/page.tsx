@@ -10,6 +10,7 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type Props = { searchParams: Promise<{ token?: string; success?: string; error?: string }> };
 

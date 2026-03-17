@@ -5,6 +5,7 @@ import { categories } from "@/lib/schema";
 import { DeleteCategoryButton } from "./DeleteCategoryButton";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminCategoriesPage() {
   const list = await db.select().from(categories).orderBy(desc(categories.createdAt));

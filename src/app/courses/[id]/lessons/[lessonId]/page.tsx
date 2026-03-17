@@ -21,6 +21,7 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function formatDuration(minutes: number | null): string {
   if (minutes == null) return "";

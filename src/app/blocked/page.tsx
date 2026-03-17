@@ -3,6 +3,7 @@ import { HeaderWithSession } from "@/components/HeaderWithSession";
 import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function BlockedPage() {
   return (

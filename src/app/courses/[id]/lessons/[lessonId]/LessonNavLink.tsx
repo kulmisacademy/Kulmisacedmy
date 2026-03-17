@@ -9,17 +9,22 @@ type Props = {
   onClick?: () => void;
 };
 
-/**
- * Link that refreshes router cache then navigates, so the target lesson page
- * always fetches fresh data (avoids "Lesson not found" from stale cache).
- */
 export function LessonNavLink({ href, className, children, onClick }: Props) {
   const router = useRouter();
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    router.refresh();
     router.push(href);
+    setTimeout(() => {
+      router.refresh();
+    }, 100);
+    setTimeout(() => {
+      // Fallback: if the App Router cache still causes stale data,
+      // force a full navigation for this critical flow.
+      if (window.location.pathname !== href) {
+        window.location.href = href;
+      }
+    }, 800);
     onClick?.();
   }
 

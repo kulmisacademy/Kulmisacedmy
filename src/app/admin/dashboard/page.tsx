@@ -11,6 +11,7 @@ import { ActivityList } from "@/components/admin/ActivityList";
 import { CourseTable } from "@/components/admin/CourseTable";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function DollarIcon() {
   return (

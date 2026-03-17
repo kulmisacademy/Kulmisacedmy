@@ -7,6 +7,7 @@ import { StatCard } from "@/components/admin/StatCard";
 import { RevenueChart } from "@/components/admin/RevenueChart";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function UsersIcon() {
   return (

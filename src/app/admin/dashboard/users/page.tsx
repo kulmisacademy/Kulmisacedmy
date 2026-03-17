@@ -7,6 +7,7 @@ import { UserSearchForm } from "./UserSearchForm";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type Props = { searchParams: Promise<{ q?: string }> };
 

@@ -4,6 +4,7 @@ import { paymentRequests, courses } from "@/lib/schema";
 import { ApproveRejectButtons } from "./ApproveRejectButtons";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function PaymentRequestsPage() {
   const requests = await db

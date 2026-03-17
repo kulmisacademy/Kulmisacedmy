@@ -6,6 +6,7 @@ import * as bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { createSession, setSessionCookie } from "@/lib/auth";
+import { updateUserSessionOnLogin } from "@/lib/session-access";
 
 export type RegisterState = { error?: string } | { success: true; redirectTo: string } | null;
 
@@ -59,6 +60,7 @@ export async function register(
     role: user.role,
   });
   await setSessionCookie(session);
+  await updateUserSessionOnLogin(user.id);
   revalidatePath("/dashboard");
   revalidatePath(returnTo);
   revalidatePath("/");

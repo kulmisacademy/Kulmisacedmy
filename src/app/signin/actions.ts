@@ -6,6 +6,7 @@ import * as bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { createSession, setSessionCookie } from "@/lib/auth";
+import { updateUserSessionOnLogin } from "@/lib/session-access";
 
 export type SignInState = { error?: string } | { success: true; redirectTo: string } | null;
 
@@ -38,6 +39,7 @@ export async function signIn(
     role: user.role,
   });
   await setSessionCookie(session);
+  await updateUserSessionOnLogin(user.id);
 
   const redirectTo = user.role === "admin" ? "/admin/dashboard" : returnTo;
   revalidatePath(redirectTo);

@@ -3,6 +3,29 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { userSessions } from "@/lib/schema";
 
+/**
+ * Call after login/register: set this device as the single active session.
+ * Updates or inserts the user_sessions row so the current IP/device is allowed.
+ */
+export async function updateUserSessionOnLogin(userId: number): Promise<void> {
+  const ip = await getClientIp();
+  const device = await getClientDevice();
+  await db
+    .insert(userSessions)
+    .values({ userId, ipAddress: ip, device })
+    .onConflictDoUpdate({
+      target: userSessions.userId,
+      set: { ipAddress: ip, device },
+    });
+}
+
+/**
+ * Call on logout: remove the active session so the next login (any device) can take over.
+ */
+export async function clearUserSessionOnLogout(userId: number): Promise<void> {
+  await db.delete(userSessions).where(eq(userSessions.userId, userId));
+}
+
 const DEVICE_MAX_LEN = 255;
 
 /**

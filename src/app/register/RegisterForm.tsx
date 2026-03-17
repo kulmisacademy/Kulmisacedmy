@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
 import { register } from "./actions";
 
@@ -11,13 +12,15 @@ export function RegisterForm({
   returnTo: string;
   returnToEncoded: string;
 }) {
+  const router = useRouter();
   const [state, formAction] = useFormState(register, null);
 
   useEffect(() => {
     if (state && "redirectTo" in state && state.redirectTo) {
+      router.refresh();
       window.location.href = state.redirectTo;
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className="mt-6 space-y-4">

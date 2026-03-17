@@ -251,6 +251,32 @@ export async function saveCourseResourceLocal(file: File | null): Promise<string
 }
 
 /**
+ * Upload course resource to Vercel Blob when local save fails (e.g. on Vercel). Same types/size as saveCourseResourceLocal.
+ */
+export async function uploadCourseResource(file: File | null): Promise<string | null> {
+  if (!file || file.size === 0) return null;
+  if (file.size > COURSE_RESOURCE_MAX_SIZE) return null;
+  const ext = COURSE_RESOURCE_TYPES[file.type] ?? path.extname(file.name).slice(1).toLowerCase();
+  const allowed = new Set(Object.values(COURSE_RESOURCE_TYPES));
+  if (!ext || !allowed.has(ext)) return null;
+
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (!token) return null;
+  try {
+    const buffer = await file.arrayBuffer();
+    const pathname = `course-resources/${Date.now()}-${(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const blob = await put(pathname, buffer, {
+      access: "public",
+      token,
+      contentType: file.type || "application/octet-stream",
+    });
+    return blob.url;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Upload lesson resource: tries local save first (works without BLOB token), then Vercel Blob.
  * Accepts by MIME type or by file extension (same as saveLessonResourceLocal).
  */
@@ -268,10 +294,15 @@ export async function uploadLessonResource(
   const local = await saveLessonResourceLocal(file);
   if (local) return local;
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (!token) return null;
   try {
-    const blob = await put(`resources/${Date.now()}-${file.name}`, file, {
+    const buffer = await file.arrayBuffer();
+    const pathname = `resources/${Date.now()}-${(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const blob = await put(pathname, buffer, {
       access: "public",
+      token,
+      contentType: file.type || "application/octet-stream",
     });
     return blob.url;
   } catch {

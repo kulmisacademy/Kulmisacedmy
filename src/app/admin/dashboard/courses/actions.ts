@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { courses, lessons, lessonResources, courseResources } from "@/lib/schema";
-import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadLessonResource, saveCourseResourceLocal } from "@/lib/upload";
+import { saveCourseThumbnailLocal, uploadCourseThumbnail, uploadLessonResource, saveCourseResourceLocal, uploadCourseResource } from "@/lib/upload";
 
 export type CreateCourseState = { error?: string } | null;
 
@@ -240,7 +240,7 @@ export async function addLessonResource(
     if (!fileUrl) {
       return {
         error:
-          "File upload failed. Use allowed types (PDF, ZIP, images, text, etc.) and max 10MB. If using Vercel Blob, set BLOB_READ_WRITE_TOKEN.",
+          "File upload failed. Use allowed types (PDF, ZIP, images, text, etc.) and max 10MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy.",
       };
     }
   } else if (resourceType === "link" && resourceUrl) {
@@ -283,11 +283,12 @@ export async function addCourseResource(
   if (!title) return { error: "Resource title is required." };
   if (!file || file.size === 0) return { error: "Please select a file to upload." };
 
-  const fileUrl = await saveCourseResourceLocal(file);
+  let fileUrl = await saveCourseResourceLocal(file);
+  if (!fileUrl) fileUrl = await uploadCourseResource(file);
   if (!fileUrl) {
     return {
       error:
-        "File upload failed. Allowed: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max size 100MB.",
+        "File upload failed. Allowed: ZIP, PDF, DOCX, XLSX, PPTX, TXT. Max 100MB. On Vercel: add BLOB_READ_WRITE_TOKEN in Settings → Environment Variables, then redeploy.",
     };
   }
 
